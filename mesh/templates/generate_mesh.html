@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fenics Web</title>
+</head>
+<body>
+    {% if not type %}
+    <form action="" method="post">
+        {% csrf_token %}
+        {{form}}
+        <button type="submit">submit</button>
+    </form>
+    {% endif %}
+
+    {% if type %}
+    <p><strong>Mesh Type: </strong>{{type}}</p>
+    <form action="/mesh/show_mesh" method="post">
+        {% csrf_token %}
+        {{form}}
+        <input type="text" name="mesh_type" value="{{type}}" hidden>
+        <button type="submit">submit</button>
+    </form>
+    {% endif %}
+
+</body>
+</html>
