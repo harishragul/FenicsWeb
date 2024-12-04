@@ -10,7 +10,6 @@ def generate_mesh_view(request):
             mesh = generate_mesh(mesh_type, request)
             mesh_data = dict(request.POST)
             del mesh_data['csrfmiddlewaretoken']
-            print(mesh_data)
             mesh_plot = generate_mesh_plot(mesh)
             interactive_mesh_plot = generate_interactive_mesh_plot(mesh)
             context = {

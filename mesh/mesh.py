@@ -143,7 +143,6 @@ def generate_mesh_plot(mesh):
 
 import plotly.graph_objects as go
 import json, plotly
-
 import plotly.utils
 import json
 
