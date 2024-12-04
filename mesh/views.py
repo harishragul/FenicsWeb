@@ -1,64 +1,61 @@
-from django.shortcuts import render, HttpResponse
-from .forms import *
-from fenics import *
-
-# Create your views here.
-def generate_mesh(request):
-    if request.POST.get('mesh_type'):
-        mesh_type = request.POST.get('mesh_type')
-
-        context = {
-            'type': mesh_type,
-        }
-
-        if mesh_type == 'interval':
-            context['form'] = IntervalMesh
-        elif mesh_type == 'rectangle':
-            context['form'] = RectangleMesh
-        elif mesh_type == 'box':
-            context['form'] = BoxMesh
-        elif mesh_type == 'unit_interval':
-            context['form'] = UnitIntervalMesh
-        elif mesh_type == 'unit_square':
-            context['form'] = UnitSquareMesh
-        elif mesh_type == 'unit_cube':
-            context['form'] = UnitCubeMesh
-        elif mesh_type == 'circle':
-            context['form'] = CircleMesh
-        elif mesh_type == 'sphere':
-            context['form'] = SphereMesh
-        elif mesh_type == 'custom':
-            context['form'] = CustomMesh
-
-        return render(request, 'generate_mesh.html', context)
-
-    else:
-        context = {
-            'form': MeshType,
-        }
-
-        return render(request, 'generate_mesh.html', context)
+from django.shortcuts import render, redirect
+from django.http import JsonResponse
+import mesh.forms as meshform
+from mesh.mesh import generate_mesh, generate_mesh_plot, generate_interactive_mesh_plot
     
-def show_mesh(request):
-    if request.POST.get('mesh_type'):
-        mesh_type = request.POST.get('mesh_type')
-        mesh_data = request.POST.items()
+def generate_mesh_view(request):
+    if request.method == "POST":
+        try:
+            mesh_type = request.session['mesh_type']
+            mesh = generate_mesh(mesh_type, request)
+            mesh_data = dict(request.POST)
+            del mesh_data['csrfmiddlewaretoken']
+            print(mesh_data)
+            mesh_plot = generate_mesh_plot(mesh)
+            interactive_mesh_plot = generate_interactive_mesh_plot(mesh)
+            context = {
+                'mesh_plot': mesh_plot,
+                'interactive_mesh_plot': interactive_mesh_plot,
+                'mesh_type': mesh_type,
+                'message': 'Mesh Generation Completed',
+                'data': mesh_data,
+            }
+            return render(request, 'mesh.html', context=context)
+        except Exception as error:
+            print(f'-------------------------------{error}----------------------------------')
+            mesh_type_form = meshform.MeshType(request.POST)
+            if mesh_type_form.is_valid():
+                request.session['mesh_type'] = mesh_type_form.cleaned_data['mesh_type']
+                mesh_type = request.session['mesh_type']
 
-        if mesh_type == 'interval':
-            mesh = IntervalMesh(mesh_data['interval_n'], mesh_data['interval_x0'], mesh_data['interval_x1'])
-        elif mesh_type == 'rectangle':
-            mesh = RectangleMesh
-        elif mesh_type == 'box':
-            mesh = BoxMesh
-        elif mesh_type == 'unit_interval':
-            mesh = UnitIntervalMesh
-        elif mesh_type == 'unit_square':
-            mesh = UnitSquareMesh
-        elif mesh_type == 'unit_cube':
-            mesh = UnitCubeMesh
-        elif mesh_type == 'circle':
-            mesh = CircleMesh
-        elif mesh_type == 'sphere':
-            mesh = SphereMesh
-        elif mesh_type == 'custom':
-            mesh = CustomMesh
+                if mesh_type == 'interval':
+                    mesh_form= meshform.IntervalMesh
+                elif mesh_type == 'rectangle':
+                    mesh_form= meshform.RectangleMesh
+                elif mesh_type == 'box':
+                    mesh_form= meshform.BoxMesh
+                elif mesh_type == 'unit_interval':
+                    mesh_form= meshform.UnitIntervalMesh
+                elif mesh_type == 'unit_square':
+                    mesh_form= meshform.UnitSquareMesh
+                elif mesh_type == 'unit_cube':
+                    mesh_form= meshform.UnitCubeMesh
+                elif mesh_type == 'circle':
+                    mesh_form= meshform.CircleMesh
+                elif mesh_type == 'sphere':
+                    mesh_form= meshform.SphereMesh
+
+                context = {
+                    'form': mesh_form,
+                    'mesh_type': mesh_type,
+                    'message': 'Enter the Mesh Parameter',
+                }
+                return render(request, 'mesh.html', context=context)
+            
+
+    context = {
+        'form': meshform.MeshType,
+        'message': 'Select Mesh Type',
+    }
+    return render(request, 'mesh.html', context=context)
+

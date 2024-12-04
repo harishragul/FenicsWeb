@@ -10,7 +10,7 @@ MESH_TYPE_CHOICES = [
     ('unit_cube', 'UnitCubeMesh (3D)'),
     ('circle', 'CircleMesh (2D)'),
     ('sphere', 'SphereMesh (3D)'),
-    ('custom', 'Custom Mesh (Gmsh, XML, XDMF)'),
+    #('custom', 'Custom Mesh (Gmsh, XML, XDMF)'),
 ]
 
 # MeshType
@@ -73,5 +73,14 @@ class SphereMesh(forms.Form):
     sphere_resolution = forms.IntegerField(label="Resolution", required=True)
 
 # ExternalMesh fields
+"""
 class CustomMesh(forms.Form):
     mesh = forms.FileField(required=True)
+
+class DynamicMeshForm(forms.Form):
+    mesh_type = forms.ChoiceField(choices=MESH_TYPE_CHOICES, label="Mesh Type", required=True)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['mesh_details'] = forms.JSONField(widget=forms.HiddenInput(), required=False)
+"""
