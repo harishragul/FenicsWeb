@@ -7,13 +7,14 @@ def generate_mesh(mesh_type, request):
         data = meshform.IntervalMesh(request.POST)
         if data.is_valid():
             interval_n = data.cleaned_data['interval_n']
-            interval_x0 = data.cleaned_data['interval_x0']
-            interval_x1 = data.cleaned_data['interval_x1']
+            interval_x0 = float(data.cleaned_data['interval_x0'])
+            interval_x1 = float(data.cleaned_data['interval_x1'])
         else:
             interval_n = 0
-            interval_x0 = 0
-            interval_x1 = 0
-        return IntervalMesh(interval_n, Point(interval_x0), Point(interval_x1))
+            interval_x0 = 0.0
+            interval_x1 = 0.0
+        mesh_str = f"{mesh_type},{interval_n},{interval_x0},{interval_x1}"
+        return IntervalMesh(interval_n, interval_x0, interval_x1), mesh_str
     
     elif mesh_type == 'rectangle':
         data = meshform.RectangleMesh(request.POST)
@@ -31,7 +32,8 @@ def generate_mesh(mesh_type, request):
             rectangle_y1 = 0
             rectangle_nx = 0
             rectangle_ny = 0
-        return RectangleMesh(Point(rectangle_x0, rectangle_y0), Point(rectangle_x1, rectangle_y1), rectangle_nx, rectangle_ny)
+        mesh_str = f"{mesh_type},{rectangle_x0},{rectangle_y0},{rectangle_x1},{rectangle_y1},{rectangle_nx},{rectangle_ny}"
+        return RectangleMesh(Point(rectangle_x0, rectangle_y0), Point(rectangle_x1, rectangle_y1), rectangle_nx, rectangle_ny), mesh_str
     
     elif mesh_type == 'box':
         data = meshform.BoxMesh(request.POST)
@@ -55,7 +57,8 @@ def generate_mesh(mesh_type, request):
             box_nx = 0
             box_ny = 0
             box_nz = 0
-        return BoxMesh(Point(box_x0, box_y0, box_z0), Point(box_x1, box_y1, box_z1), box_nx, box_ny, box_nz)
+        mesh_str = f"{mesh_str},{box_x0},{box_y0},{box_z0},{box_x1},{box_y1},{box_z1},{box_nx},{box_ny},{box_nz}"
+        return BoxMesh(Point(box_x0, box_y0, box_z0), Point(box_x1, box_y1, box_z1), box_nx, box_ny, box_nz), mesh_str
     
     elif mesh_type == 'unit_interval':
         data = meshform.UnitIntervalMesh(request.POST)
@@ -63,7 +66,8 @@ def generate_mesh(mesh_type, request):
             unit_nx = data.cleaned_data['unit_nx']
         else:
             unit_nx = 0
-        return UnitIntervalMesh(unit_nx)
+        mesh_str = f'{mesh_type},{unit_nx}'
+        return UnitIntervalMesh(unit_nx), mesh_str
     
     elif mesh_type == 'unit_square':
         data = meshform.UnitSquareMesh(request.POST)
@@ -73,7 +77,8 @@ def generate_mesh(mesh_type, request):
         else:
             unit_nx = 0
             unit_ny = 0
-        return UnitSquareMesh(unit_nx, unit_ny)
+        mesh_str = f'{mesh_type},{unit_nx},{unit_ny}'
+        return UnitSquareMesh(unit_nx, unit_ny), mesh_str
     
     elif mesh_type == 'unit_cube':
         data = meshform.UnitCubeMesh(request.POST)
@@ -86,8 +91,8 @@ def generate_mesh(mesh_type, request):
             unit_nx = 0
             unit_ny = 0
             unit_nz = 0
-
-        return UnitCubeMesh(unit_nx, unit_ny, unit_nz)
+        mesh_str = f'{mesh_type},{unit_nx},{unit_ny},{unit_nz}'
+        return UnitCubeMesh(unit_nx, unit_ny, unit_nz), mesh_str
     
     elif mesh_type == 'circle':
         data = meshform.CircleMesh(request.POST)
@@ -101,7 +106,8 @@ def generate_mesh(mesh_type, request):
             circle_yc = 0
             circle_radius = 0
             circle_resolution = 0
-        return CircleMesh(Point(circle_xc, circle_yc),circle_radius,circle_resolution)
+        mesh_str = f'{mesh_type},{circle_xc},{circle_yc},{circle_radius},{circle_resolution}'
+        return CircleMesh(Point(circle_xc, circle_yc),circle_radius,circle_resolution), mesh_str
     
     elif mesh_type == 'sphere':
         data = meshform.SphereMesh(request.POST)
@@ -117,8 +123,8 @@ def generate_mesh(mesh_type, request):
             sphere_zc = 0
             sphere_radius = 0
             sphere_resolution = 0
-        return SphereMesh(Point(sphere_xc, sphere_yc, sphere_zc), sphere_radius,sphere_resolution)
-    
+            mesh_str = f'{mesh_type},{sphere_xc},{sphere_yc},{sphere_zc},{sphere_radius},{sphere_resolution}'
+        return SphereMesh(Point(sphere_xc, sphere_yc, sphere_zc), sphere_radius,sphere_resolution), mesh_str
     else:
         raise ValueError("Invalid mesh type.")
     
@@ -126,6 +132,8 @@ def generate_mesh(mesh_type, request):
 import os
 import matplotlib.pyplot as plt
 from FenicsWeb.settings import BASE_DIR
+import matplotlib
+matplotlib.use("Agg")
 
 STATIC_DIR = os.path.join(BASE_DIR, 'static') 
 

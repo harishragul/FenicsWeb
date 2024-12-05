@@ -12,7 +12,6 @@
 
     <nav class="navbar navbar-light bg-light">
         <div class="container-fluid">
-            
             <img src="{% static 'img/fenics_logo.png' %}" alt="logo" height="50px">
             <a class="navbar-brand" href="#">FenicsWeb</a>
             <a class="nav-link" aria-current="page" href="{% url 'generate_mesh' %}">Mesh</a>
@@ -24,10 +23,10 @@
         <div class="row">
             <div class="col">
 
-                <p><strong>Message: </strong>{{ message }}</p>
+                <p style="color: green;"><strong style="color: black;">Message: </strong>{{ message }}</p>
 
                 {% if mesh_plot %}
-                <h4>Mesh Parameters</h4>
+                <h4 style="text-align: center;">Mesh Parameters</h4>
                     {% if data %}
 
                     <table class="table">
@@ -60,24 +59,23 @@
                         <button class="btn btn-primary" type="submit">Next</button>
                     </form>
                 {% endif %}
-                
-                <hr>
 
-                {% if mesh_plot %}
-                <h4>Generated Mesh (Non-Intractive)</h4>
-                <img src="{% static mesh_plot %}" alt="Generated Mesh" />
-                {% endif %}
-            </div>
-
-            <div class="col">
                 {% if interactive_mesh_plot %}
-                <h4>Interactive Mesh</h4>
+                <h4 style="text-align: center;">Interactive Mesh</h4>
                     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-                    <div id="plot" style="width: 600px; height: 600px;"></div>
+                    <div id="plot" style="width: 600px; height: 600px; text-align: center;"></div>
                     <script>
                         var plotData = JSON.parse('{{ interactive_mesh_plot|escapejs }}');
                         Plotly.newPlot('plot', plotData.data, plotData.layout);
                     </script>
+                {% endif %}
+
+            </div>
+
+            <div class="col">
+                {% if mesh_plot %}
+                <h4 style="text-align: center;">Generated Mesh (Non-Intractive)</h4>
+                <img src="{% static mesh_plot %}" alt="Generated Mesh" />
                 {% endif %}
             </div>
         </div>

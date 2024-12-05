@@ -15,6 +15,7 @@ MESH_TYPE_CHOICES = [
 
 # MeshType
 class MeshType(forms.Form):
+    mesh_name = forms.CharField(max_length=200, required=True, label="Mesh Name")
     mesh_type = forms.ChoiceField(choices=MESH_TYPE_CHOICES, label="Mesh Type", required=True)
 
 # IntervalMesh fields
