@@ -57,7 +57,7 @@ def generate_mesh(mesh_type, request):
             box_nx = 0
             box_ny = 0
             box_nz = 0
-        mesh_str = f"{mesh_str},{box_x0},{box_y0},{box_z0},{box_x1},{box_y1},{box_z1},{box_nx},{box_ny},{box_nz}"
+        mesh_str = f"{mesh_type},{box_x0},{box_y0},{box_z0},{box_x1},{box_y1},{box_z1},{box_nx},{box_ny},{box_nz}"
         return BoxMesh(Point(box_x0, box_y0, box_z0), Point(box_x1, box_y1, box_z1), box_nx, box_ny, box_nz), mesh_str
     
     elif mesh_type == 'unit_interval':
@@ -94,37 +94,54 @@ def generate_mesh(mesh_type, request):
         mesh_str = f'{mesh_type},{unit_nx},{unit_ny},{unit_nz}'
         return UnitCubeMesh(unit_nx, unit_ny, unit_nz), mesh_str
     
-    elif mesh_type == 'circle':
-        data = meshform.CircleMesh(request.POST)
-        if data.is_valid():
-            circle_xc = data.cleaned_data['circle_xc']
-            circle_yc = data.cleaned_data['circle_yc']
-            circle_radius = data.cleaned_data['circle_radius']
-            circle_resolution = data.cleaned_data['circle_resolution']
-        else:
-            circle_xc = 0
-            circle_yc = 0
-            circle_radius = 0
-            circle_resolution = 0
-        mesh_str = f'{mesh_type},{circle_xc},{circle_yc},{circle_radius},{circle_resolution}'
-        return CircleMesh(Point(circle_xc, circle_yc),circle_radius,circle_resolution), mesh_str
+    else:
+        raise ValueError("Invalid mesh type.")
     
-    elif mesh_type == 'sphere':
-        data = meshform.SphereMesh(request.POST)
-        if data.is_valid():
-            sphere_xc = data.cleaned_data['sphere_xc']
-            sphere_yc = data.cleaned_data['sphere_yc']
-            sphere_zc = data.cleaned_data['sphere_zc']
-            sphere_radius = data.cleaned_data['sphere_radius']
-            sphere_resolution = data.cleaned_data['sphere_resolution']
-        else:
-            sphere_xc = 0
-            sphere_yc = 0
-            sphere_zc = 0
-            sphere_radius = 0
-            sphere_resolution = 0
-            mesh_str = f'{mesh_type},{sphere_xc},{sphere_yc},{sphere_zc},{sphere_radius},{sphere_resolution}'
-        return SphereMesh(Point(sphere_xc, sphere_yc, sphere_zc), sphere_radius,sphere_resolution), mesh_str
+#Show Mesh Function
+def show_mesh(mesh_str):
+    mesh_list = mesh_str.split(',')
+
+    if mesh_list[0] == 'interval':
+        interval_n = int(mesh_list[1])
+        interval_x0 = float(mesh_list[2])
+        interval_x1 = float(mesh_list[3])
+        return IntervalMesh(interval_n, interval_x0, interval_x1)
+    
+    elif mesh_list[0] == 'rectangle':
+        rectangle_x0 = float(mesh_list[1])
+        rectangle_y0 = float(mesh_list[2])
+        rectangle_x1 = float(mesh_list[3])
+        rectangle_y1 = float(mesh_list[4])
+        rectangle_nx = int(mesh_list[5])
+        rectangle_ny = int(mesh_list[6])
+        return RectangleMesh(Point(rectangle_x0, rectangle_y0), Point(rectangle_x1, rectangle_y1), rectangle_nx, rectangle_ny)
+    
+    elif mesh_list[0] == 'box':
+        box_x0 = float(mesh_list[1])
+        box_y0 = float(mesh_list[2])
+        box_z0 = float(mesh_list[3])
+        box_x1 = float(mesh_list[4])
+        box_y1 = float(mesh_list[5])
+        box_z1 = float(mesh_list[6])
+        box_nx = int(mesh_list[7])
+        box_ny = int(mesh_list[8])
+        box_nz = int(mesh_list[9])
+        return BoxMesh(Point(box_x0, box_y0, box_z0), Point(box_x1, box_y1, box_z1), box_nx, box_ny, box_nz)
+    
+    elif mesh_list[0] == 'unit_interval':
+        unit_nx = int(mesh_list[1])
+        return UnitIntervalMesh(unit_nx), mesh_str
+    
+    elif mesh_list[0] == 'unit_square':
+        unit_nx = int(mesh_list[1])
+        unit_ny = int(mesh_list[2])
+        return UnitSquareMesh(unit_nx, unit_ny)
+    
+    elif mesh_list[0] == 'unit_cube':
+        unit_nx = int(mesh_list[1])
+        unit_ny = int(mesh_list[2])
+        unit_nz = int(mesh_list[3])
+        return UnitCubeMesh(unit_nx, unit_ny, unit_nz)
     else:
         raise ValueError("Invalid mesh type.")
     
@@ -143,11 +160,11 @@ def generate_mesh_plot(mesh):
     if not os.path.exists(STATIC_DIR):
         os.makedirs(STATIC_DIR)
 
-    plot_filename = os.path.join(STATIC_DIR, 'temp_plot.png')
+    plot_filename = os.path.join(STATIC_DIR, 'mesh_plot.png')
     plt.savefig(plot_filename)
     plt.close()
 
-    return 'temp_plot.png'
+    return 'mesh_plot.png'
 
 import plotly.graph_objects as go
 import json, plotly

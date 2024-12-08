@@ -58,21 +58,6 @@ class UnitCubeMesh(forms.Form):
     unit_ny = forms.IntegerField(label="Number of divisions (ny)", required=True)
     unit_nz = forms.IntegerField(label="Number of divisions (nz)", required=True)
 
-# CircleMesh fields
-class CircleMesh(forms.Form):
-    circle_xc = forms.FloatField(label="Center x (xc)", required=True)
-    circle_yc = forms.FloatField(label="Center y (yc)", required=True)
-    circle_radius = forms.FloatField(label="Radius", required=True)
-    circle_resolution = forms.IntegerField(label="Resolution", required=True)
-
-# SphereMesh fields
-class SphereMesh(forms.Form):
-    sphere_xc = forms.FloatField(label="Center x (xc)", required=True)
-    sphere_yc = forms.FloatField(label="Center y (yc)", required=True)
-    sphere_zc = forms.FloatField(label="Center z (zc)", required=True)
-    sphere_radius = forms.FloatField(label="Radius", required=True)
-    sphere_resolution = forms.IntegerField(label="Resolution", required=True)
-
 # ExternalMesh fields
 """
 class CustomMesh(forms.Form):
