@@ -1,18 +1,22 @@
+---
 title: 'An Open-Source Application for Thermal Conduction Analysis: Integrating FEniCS with Django'
+
 tags:
   - Python
   - Django
   - FEniCS
   - FEM
   - Thermal
+
 authors:
   - name: Harish Ragul Rajaramaduraikarthik
-    orcid: 0000-0000-0000-0000
-    affiliation: "1"
+  orcid: 0000-0000-0000-0000
+  affiliation: "1"
+
 affiliations:
  - name: Department of Mechanical Engineering, JJ College of Engineering and Technology, Trichy, India
-   index: 1
-date: 19 Jan 2025
+ index: 1
+ date: 19 Jan 2025
 
 # Summary
 
