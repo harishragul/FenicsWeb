@@ -35,9 +35,11 @@ For the initial phase this project only focused on the steady state thermal cond
 The Django form is created to enable users to define domains (meshes) with various geometries such as intervals, rectangles, and cubes. Use FEniCS for mesh generation based on user input and create visualizations using Matplotlib for plot and the mesh data storage in the database for reuse. The mesh module is routed into http://127.0.0.1:8000/mesh/
 
 ![Mesh Selection Fields \label{fig:meshselect}](images/mesh_select.png)
+### 1D Mesh
 ![Interval Mesh Fields \label{fig:1DMeshField}](images/1DMeshField.png)
 ![Interval Mesh \label{fig:1DMesh}](images/1DMesh.png)
-
-
+### 2D Mesh
+![Rectangle Mesh \label{fig:2DMesh}](images/2DMesh.png)
+### 3D Mesh
 
 # References
