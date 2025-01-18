@@ -9,11 +9,12 @@ tags:
 authors:
   - name: Harish Ragul Rajaramaduraikarthik
     orcid: 0009-0007-5058-3995
-    affiliation: 1
+    affiliation: 1, 2
 affiliations:
  - name: JJ College of Engineering and Technology, Trichy, India
    index: 1
-date: 19 January 2025
+ - name: School of Engineering and Technology, Dhanalakshmi Srinivasan University, Perambalur, India
+   index: 2
 ---
 
 # Summary
@@ -24,49 +25,12 @@ This ``FEniCSWEB`` project presents a powerful computation initiative for solvin
 
 The Existing finite element analysis (FEA) softwares (like Ansys, Abaqus) often requires expensive licenses and extensive training. Many Open Source FEA tools have deep learning curves, making them challenging for beginners; it is not so user friendly for non-experts. This project simplifies the process by a web interface, allowing users to easily define problems, set boundary conditions, and visualize results. By leveraging Django and FEniCS, this project combines advanced numerical analysis with web platforms.
 
-# Mathematics
+# Design and Development
 
-Single dollars ($) are required for inline mathematics e.g. $f(x) = e^{\pi/x}$
+For the initial phase this project only focused on the steady state thermal conduction problem. This project development is split into two modules 1. Mesh Generation Module, 2. Solver module. 
 
-Double dollars make self-standing equations:
+![Integration of Fenics with Django.\label{fig:workflow}](work_flow.png)
 
-$$\Theta(x) = \left\{\begin{array}{l}
-0\textrm{ if } x < 0\cr
-1\textrm{ else}
-\end{array}\right.$$
 
-You can also use plain \LaTeX for equations
-\begin{equation}\label{eq:fourier}
-\hat f(\omega) = \int_{-\infty}^{\infty} f(x) e^{i\omega x} dx
-\end{equation}
-and refer to \autoref{eq:fourier} from text.
-
-# Citations
-
-Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% }
-
-# Acknowledgements
-
-We acknowledge contributions from Brigitta Sipocz, Syrtis Major, and Semyeong
-Oh, and support from Kathryn Johnston during the genesis of this project.
 
 # References
