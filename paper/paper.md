@@ -1,4 +1,3 @@
----
 title: 'An Open-Source Application for Thermal Conduction Analysis: Integrating FEniCS with Django'
 tags:
   - Python
