@@ -29,7 +29,14 @@ The Existing finite element analysis (FEA) softwares (like Ansys, Abaqus) often 
 
 For the initial phase this project only focused on the steady state thermal conduction problem. This project development is split into two modules 1. Mesh Generation Module, 2. Solver module. 
 
-![Integration of Fenics with Django.\label{fig:workflow}](work_flow.png)
+![Integration of Fenics with Django.\label{fig:workflow}](images/work_flow.png)
+
+## a. Mesh Generation Module:
+The Django form is created to enable users to define domains (meshes) with various geometries such as intervals, rectangles, and cubes. Use FEniCS for mesh generation based on user input and create visualizations using Matplotlib for plot and the mesh data storage in the database for reuse. The mesh module is routed into http://127.0.0.1:8000/mesh/
+
+![Mesh Selection Fields \label{fig:meshselect}](images/mesh_select.png)
+![Interval Mesh Fields \label{fig:1DMeshField}](images/1DMeshField.png)
+![Interval Mesh \label{fig:1DMesh}](images/1DMesh.png)
 
 
 
