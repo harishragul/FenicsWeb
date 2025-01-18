@@ -22,14 +22,8 @@ def conduction(request):
             mesh = show_mesh(mesh_str)
             mesh_plot = generate_mesh_plot(mesh)
             
-            solution, solution_data, coordinates = solve_conduction(dimension, mesh, left_bc, right_bc, top_bc, bottom_bc, front_bc, back_bc, f, k)
-
-            solution_list = []
-            for index in range(len(coordinates)):
-                solution_list.append([list(coordinates[index]), solution_data[index]])
-
+            solution, solution_list = solve_conduction(dimension, mesh, left_bc, right_bc, top_bc, bottom_bc, front_bc, back_bc, f, k)
             solution_plot = generate_solution_plot(solution)
-            print(solution)
 
             context = {
                 'mesh_plot': mesh_plot,

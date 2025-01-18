@@ -44,17 +44,22 @@ def solve_conduction(dimension, mesh, left_bc, right_bc, top_bc, bottom_bc, fron
         bcs.append(DirichletBC(V, Constant(top_bc), f"near(x[1], {mesh_y_max})"))
         bcs.append(DirichletBC(V, Constant(front_bc), f"near(x[2], {mesh_z_min})"))
         bcs.append(DirichletBC(V, Constant(back_bc), f"near(x[2], {mesh_z_max})"))
+    
         
 
     # Solve
     u_sol = Function(V)
     solve(a == L, u_sol, bcs)
 
+    print(u_sol)
+
     # Export solution
-    solution = u_sol.vector().get_local()
+    solution = u_sol.compute_vertex_values(mesh)
     coordinates = mesh.coordinates()
 
-    return u_sol, solution, coordinates
+    solution_list = [[list(coordinates[i]), solution[i]] for i in range(len(solution))]
+
+    return u_sol, solution_list
 
 import os
 import matplotlib.pyplot as plt
