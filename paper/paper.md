@@ -15,6 +15,8 @@ affiliations:
    index: 1
  - name: School of Engineering and Technology, Dhanalakshmi Srinivasan University, Perambalur, India
    index: 2
+date: 19 Jan 2024
+bibliography: paper.bib
 ---
 
 # Summary
@@ -78,5 +80,28 @@ For the 1D problem it have only ``2 boundaries`` put ``zero`` for rest of the fi
 ![1D Soltuion \label{fig:1D Soltuion}](images/1DSol.png)
 ![1D Soltuion Data \label{fig:1D Soltuion Data}](images/1Ddata.png)
 
+### 2D Mesh
+![2D Solver Input Field \label{fig:2D Solver Input Field}](images/2DSST.png)
+![2D Soltuion \label{fig:2D Soltuion}](images/2DSol.png)
+
+### 3D Mesh
+![3D Solver Input Field \label{fig:3D Solver Input Field}](images/3DSST.png)
+![3D Soltuion \label{fig:3D Soltuion}](images/3DSol.png)
+
+#### Note
+- For the boundary value temperature refers with the unit of ``°C`` Celsius then use ``(W/m-°C)`` watts per meter per degree Celsius
+- For the boundary value temperature refers with the unit of ``K`` Kelvin then use ``(W/m·K)`` watts per meter Kelvin
+- For the insulated boundary and unrequired boundary fields just put ``zero``
+
+# Future Work
+- Implementation of custom domain (Mesh)
+- Implementation of other thermal problems (Convection and Radiation) and boundaries (Neumann and Robin)
+
 
 # References
+- Mats G. Larson  Fredrik Bengzon, “The Finite Element Method: Theory, Implementation, and Applications”, DOI 10.1007/978-3-642-33287-6, Springer Heidelberg New York Dordrecht London
+- Hans Petter Langtangen • Anders Logg, “Solving PDEs in Python The FEniCS Tutorial I”, DOI 10.1007/978-3-319-52462-7, Simula SpringerBriefs on Computing 
+- Anders Logg • Kent-Andre Mardal • Garth N. Wells, “Automated Solution of Differential Equations by the Finite Element Method”, DOI 10.1007/978-3-642-23099-8, 2011 The FEniCS Project.
+- https://docs.fenicsproject.org/dolfinx/v0.9.0/python/demos.html
+- https://jsdokken.com/dolfinx-tutorial/
+- https://docs.djangoproject.com/en/5.1/
