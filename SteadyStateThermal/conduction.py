@@ -70,7 +70,12 @@ matplotlib.use("Agg")
 STATIC_DIR = os.path.join(BASE_DIR, 'static') 
 
 def generate_solution_plot(mesh):
+    plt.figure()
     plot(mesh)
+
+    # Add labels and title
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
 
     if not os.path.exists(STATIC_DIR):
         os.makedirs(STATIC_DIR)

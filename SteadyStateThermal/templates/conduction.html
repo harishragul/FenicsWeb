@@ -27,22 +27,20 @@
     <div class="container">
         
         <div class="row">
-            
             <div class="col">
-
                 {% if mesh_plot %}
                 <h5>Generated Mesh: </h5>
                 <img src="{% static mesh_plot %}" style="width: 500px; height: auto;" alt="Generated Mesh" />
                 {% endif %}
             </div>
-
+        
             {% if solution_plot %}
             <div class="col">
                 <h5>Generated Solution: </h5>
                 <img src="{% static solution_plot %}" style="width: 500px; height: auto;" alt="Generated Mesh" />
             </div>
             {% endif %}
-
+        
             {% if form %}
             <div class="col">
                 <form method="post" enctype="multipart/form-data">
@@ -57,31 +55,85 @@
     <hr>
 
     <div class="container">
-
-    {% if solution_list %}
-    <h5>Solution Data: </h5>
-
-    <table class="table">
-        <thead>
-            <tr>
-              <th scope="col">Coordinates</th>
-              <th scope="col">Solution</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            {% for data in solution_list %}
-            <tr>
-                {% for item in data %}
-                <td scope="col"><p>{{item}}</p></td>
+        {% if solution_list %}
+        <h5>Solution Data: </h5>
+    
+        <!-- Search field -->
+        <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="Search for coordinates or solution..">
+    
+        <!-- Download button -->
+        <button class="btn btn-secondary" onclick="downloadCSV()">Download CSV</button>
+    
+        <table class="table" id="solutionTable">
+            <thead>
+                <tr>
+                    <th scope="col">Coordinates</th>
+                    <th scope="col">Solution</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for data in solution_list %}
+                <tr>
+                    {% for item in data %}
+                    <td>{{ item }}</td>
+                    {% endfor %}
+                </tr>
                 {% endfor %}
-            </tr>
-            {% endfor %}
-        </tbody>
+            </tbody>
+        </table>
+        {% endif %}
+    </div>
+    
+    <script>
+    function filterTable() {
+        var input, filter, table, tr, td, i, j, txtValue;
+        input = document.getElementById("searchInput");
+        filter = input.value.toLowerCase();
+        table = document.getElementById("solutionTable");
+        tr = table.getElementsByTagName("tr");
+    
+        for (i = 1; i < tr.length; i++) {
+            tr[i].style.display = "none";
+            td = tr[i].getElementsByTagName("td");
+            for (j = 0; j < td.length; j++) {
+                if (td[j]) {
+                    txtValue = td[j].textContent || td[j].innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    
+    function downloadCSV() {
+        var table = document.getElementById("solutionTable");
+        var rows = table.getElementsByTagName("tr");
+        var csvContent = "";
 
-    </table>
-    {% endif %}
-</div>
+        for (var i = 0; i < rows.length; i++) {
+            if (rows[i].style.display !== "none") {
+                var cols = rows[i].getElementsByTagName("td");
+                var rowContent = [];
+                for (var j = 0; j < cols.length; j++) {
+                    rowContent.push(cols[j].innerText);
+                }
+                csvContent += rowContent.join(",") + "\n";
+            }
+        }
+
+        var blob = new Blob([csvContent], { type: 'text/csv' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.setAttribute("hidden", "");
+        a.setAttribute("href", url);
+        a.setAttribute("download", "solution_data.csv");
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+    </script>
     
 </body>
 </html>
