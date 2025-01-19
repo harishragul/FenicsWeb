@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="fa196db5-d3bf-4d48-819a-16d0d73c5376" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/db.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mesh/mesh.py" beforeDir="false" afterPath="$PROJECT_DIR$/mesh/mesh.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mesh/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/mesh/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mesh/templates/mesh.html" beforeDir="false" afterPath="$PROJECT_DIR$/mesh/templates/mesh.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mesh/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/mesh/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/temp_plot.png" beforeDir="false" afterPath="$PROJECT_DIR$/static/temp_plot.png" afterDir="false" />
+    <list default="true" id="fa196db5-d3bf-4d48-819a-16d0d73c5376" name="Changes" comment="docker fix">
+      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,12 +18,12 @@
     &quot;assignee&quot;: &quot;harishragul&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/harishragul/FenicsWeb.git&quot;,
-    &quot;accountId&quot;: &quot;5ba87204-b013-4b93-9241-f9bba6f95a2b&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/harishragul/FenicsWeb.git",
+    "accountId": "296f342e-fcaa-42db-a2ef-fab758e65528"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
 }</component>
@@ -37,17 +32,18 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;//wsl.localhost/Ubuntu-24.04/home/harish/project/FenicsWeb&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/home/harish/Project/FenicsWeb"
   }
-}</component>
+}]]></component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-5b207ade9991-746f403e7f0c-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-241.17890.14" />
+        <option value="bundled-python-sdk-1b1018131e27-aa17d162503b-com.jetbrains.pycharm.community.sharedIndexes.bundled-PC-243.22562.180" />
       </set>
     </attachedChunks>
   </component>
@@ -60,6 +56,19 @@
       <option name="presentableId" value="Default" />
       <updated>1733318170289</updated>
     </task>
+    <task id="LOCAL-00001" summary="docker fix">
+      <option name="closed" value="true" />
+      <created>1737303829248</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1737303829248</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="docker fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="docker fix" />
   </component>
 </project>
