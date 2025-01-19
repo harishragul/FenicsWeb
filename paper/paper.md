@@ -75,7 +75,7 @@ The Steady State Thermal Conduction Solver is routed to ``http://127.0.0.1:8000/
 
 ### 1D Mesh
 ![1D Solver Input Field \label{fig:1D Solver Input Field}](images/1DSST.png)
-For the 1D problem it have only ``2 boundaries`` put ``zero`` for rest of the fields. These boundaries are ``Dirichlet boundaries``; the ``Neumann boundaries`` will be update in next version.
+For the 1D problem it has only 2 boundaries and zero for the rest of the fields. These boundaries are ``Dirichlet boundaries``; the ``Neumann boundaries`` will be updated in the next version.
 
 ![1D Soltuion \label{fig:1D Soltuion}](images/1DSol.png)
 ![1D Soltuion Data \label{fig:1D Soltuion Data}](images/1Ddata.png)

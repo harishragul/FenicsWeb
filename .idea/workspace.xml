@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="fa196db5-d3bf-4d48-819a-16d0d73c5376" name="Changes" comment="">
+    <list default="true" id="fa196db5-d3bf-4d48-819a-16d0d73c5376" name="Changes" comment="JOSS">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/paper/paper.md" beforeDir="false" afterPath="$PROJECT_DIR$/paper/paper.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -60,6 +64,19 @@
       <option name="presentableId" value="Default" />
       <updated>1733318170289</updated>
     </task>
+    <task id="LOCAL-00001" summary="JOSS">
+      <option name="closed" value="true" />
+      <created>1737311738469</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1737311738469</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="JOSS" />
+    <option name="LAST_COMMIT_MESSAGE" value="JOSS" />
   </component>
 </project>
