@@ -1,0 +1,8 @@
+name: fenicsproject
+channels:
+  - conda-forge
+dependencies:
+  - fenics
+  - django
+  - matplotlib
+  - plotly
