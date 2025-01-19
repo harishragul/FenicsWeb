@@ -43,4 +43,28 @@ The Django form is created to enable users to define domains (meshes) with vario
 ### 3D Mesh
 ![Unit Cube Mesh \label{fig:3DMesh}](images/3DMesh.png)
 
+## b. Solver Module:
+Developed a Python-based solver using FEniCS to compute the temperature field ``(u)`` by solving the steady-state heat conduction equation:
+
+``−∇⋅(k∇u)=f`` in the domain 
+
+``u=u0`` on Dirichlet boundaries
+
+Forms are implement for users to specify boundary conditions, material properties, and heat sources which assemble and solve the finite element equations and visualization the solution. Visualization using Matplotlib to visualize Generated meshes and their properties, Computed temperature distributions and heat flux vectors. It provides both PNG visualization and detailed result repect to the coordinates.
+
+### Problem Statement
+The heat equation we solve is:
+
+``-Δu = f   in Ω,``
+
+with the boundary condition:
+
+``u =uD  in ∂Ω``
+
+where:
+``Δu`` is the Laplace operator (second derivative).
+``f`` is the source term.
+``uD``​ is the prescribed temperature on the boundary (∂Ω).
+
+
 # References
