@@ -1,3 +1,5 @@
+[![JOSS Reviews](https://joss.theoj.org/badges/reviewed_by/@harishragul)](https://joss.theoj.org/papers/reviewed_by/@harishragul)
+
 # Setup Environment
 ```conda create -n fenicsproject -c conda-forge fenics django matplotlib plotly```
 
