@@ -36,9 +36,10 @@ For the initial phase this project only focused on the steady state thermal cond
 ## a. Mesh Generation Module:
 The Django form is created to enable users to define domains (meshes) with various geometries such as intervals, rectangles, and cubes. Use FEniCS for mesh generation based on user input and create visualizations using Matplotlib for plot and the mesh data storage in the database for reuse. The mesh module is routed into ``http://127.0.0.1:8000/mesh/`` which we can generate meshs like ```IntervalMesh (1D), RectangleMesh (2D), BoxMesh (3D), UnitIntervalMesh (1D), UnitSquareMesh (2D), UnitCubeMesh (3D)```
 
-![Mesh Selection Fields \label{fig:meshselect}](images/mesh_select.png)
-### 1D Mesh
+![Mesh Selection Fields \label{fig:meshselect}](images/mesh_select.png)\
 ![Interval Mesh Fields \label{fig:1DMeshField}](images/1DMeshField.png)
+
+### 1D Mesh
 ![Interval Mesh \label{fig:1DMesh}](images/1DMesh.png)
 ### 2D Mesh
 ![Rectangle Mesh \label{fig:2DMesh}](images/2DMesh.png)
@@ -77,21 +78,21 @@ The Steady State Thermal Conduction Solver is routed to ``http://127.0.0.1:8000/
 ![1D Solver Input Field \label{fig:1D Solver Input Field}](images/1DSST.png)
 For the 1D problem it has only 2 boundaries and zero for the rest of the fields. These boundaries are ``Dirichlet boundaries``; the ``Neumann boundaries`` will be updated in the next version.
 
-![1D Soltuion \label{fig:1D Soltuion}](images/1DSol.png)
+![1D Soltuion \label{fig:1D Soltuion}](images/1DSol.png)\
 ![1D Soltuion Data \label{fig:1D Soltuion Data}](images/1Ddata.png)
 
 ### 2D Mesh
-![2D Solver Input Field \label{fig:2D Solver Input Field}](images/2DSST.png)
+![2D Solver Input Field \label{fig:2D Solver Input Field}](images/2DSST.png)\
 ![2D Soltuion \label{fig:2D Soltuion}](images/2DSol.png)
 
 ### 3D Mesh
-![3D Solver Input Field \label{fig:3D Solver Input Field}](images/3DSST.png)
+![3D Solver Input Field \label{fig:3D Solver Input Field}](images/3DSST.png)\
 ![3D Soltuion \label{fig:3D Soltuion}](images/3DSol.png)
 
 #### Note
 - For the boundary value temperature refers with the unit of ``°C`` Celsius then use ``(W/m-°C)`` watts per meter per degree Celsius
 - For the boundary value temperature refers with the unit of ``K`` Kelvin then use ``(W/m·K)`` watts per meter Kelvin
-- For the insulated boundary and unrequired boundary fields just put ``zero``
+- For the insulated boundary the Neumann Boundary Condition will be added in next phase of the work
 
 # Future Work
 - Implementation of custom domain (Mesh)
