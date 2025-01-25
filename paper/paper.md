@@ -41,8 +41,10 @@ The Django form is created to enable users to define domains (meshes) with vario
 
 ### 1D Mesh
 ![Interval Mesh \label{fig:1DMesh}](images/1DMesh.png)
+
 ### 2D Mesh
 ![Rectangle Mesh \label{fig:2DMesh}](images/2DMesh.png)
+
 ### 3D Mesh
 ![Unit Cube Mesh \label{fig:3DMesh}](images/3DMesh.png)
 
