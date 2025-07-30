@@ -54,11 +54,12 @@ def conduction(request):
             
             try:
                 solution, solution_list = solve_conduction(dimension, mesh, bc_data, f, k)
-                solution_plot = generate_solution_plot(solution)
+                solution_plots = generate_solution_plot(solution)
 
                 context = {
                     'mesh_plot': mesh_plot,
-                    'solution_plot': solution_plot,
+                    'solution_plot_interactive': solution_plots['interactive'],
+                    'solution_plot_static': solution_plots['static'],
                     'message': 'Problem Solved Successfully',
                     'solution_list': solution_list,
                 }

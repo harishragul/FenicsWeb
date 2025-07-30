@@ -34,10 +34,90 @@
                 {% endif %}
             </div>
         
-            {% if solution_plot %}
-            <div class="col">
+            {% if solution_plot_interactive or solution_plot_static %}
+            <div class="col-12">
                 <h5>Generated Solution: </h5>
-                <img src="{% static solution_plot %}" style="width: 500px; height: auto;" alt="Generated Mesh" />
+                
+                <!-- Toggle buttons for plot types -->
+                <div class="mb-3">
+                    <div class="btn-group" role="group" aria-label="Plot type selector">
+                        <button type="button" class="btn btn-primary active" onclick="showInteractivePlot()" id="interactiveBtn">
+                            Interactive Plot
+                        </button>
+                        <button type="button" class="btn btn-outline-primary" onclick="showStaticPlot()" id="staticBtn">
+                            Static Plot
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="showBothPlots()" id="bothBtn">
+                            Show Both
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive Plot -->
+                {% if solution_plot_interactive %}
+                <div id="interactivePlotContainer" class="plot-container mb-4">
+                    <h6>Interactive Plot</h6>
+                    <div style="width: 100%; height: 600px; border: 1px solid #ccc; border-radius: 5px; overflow: hidden;">
+                        <iframe src="{% static solution_plot_interactive %}" 
+                                style="width: 100%; height: 100%; border: none;" 
+                                title="Interactive Solution Plot"></iframe>
+                    </div>
+                    <div class="mt-2 p-2 bg-light rounded">
+                        <small><strong>Interactive Features:</strong></small>
+                        <ul class="mb-0 small">
+                            <li>Hover over points to see exact temperature values</li>
+                            <li>Zoom in/out using mouse wheel or controls</li>
+                            <li>Pan around by clicking and dragging</li>
+                            <li>Use the toolbar on the top-right for more options</li>
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Static Plot -->
+                {% if solution_plot_static %}
+                <div id="staticPlotContainer" class="plot-container mb-4" style="display: none;">
+                    <h6>Static Plot</h6>
+                    <div class="text-center">
+                        <img src="{% static solution_plot_static %}" 
+                             style="max-width: 100%; height: auto; border: 1px solid #ccc; border-radius: 5px;" 
+                             alt="Static Solution Plot" />
+                    </div>
+                    <div class="mt-2 p-2 bg-light rounded">
+                        <small><strong>Static Features:</strong></small>
+                        <ul class="mb-0 small">
+                            <li>Traditional matplotlib visualization</li>
+                            <li>High-quality static image</li>
+                            <li>Right-click to save image</li>
+                            <li>Fixed view optimized for the data</li>
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Both plots side by side -->
+                <div id="bothPlotsContainer" class="row" style="display: none;">
+                    {% if solution_plot_interactive %}
+                    <div class="col-md-6">
+                        <h6>Interactive Plot</h6>
+                        <div style="width: 100%; height: 500px; border: 1px solid #ccc; border-radius: 5px; overflow: hidden;">
+                            <iframe src="{% static solution_plot_interactive %}" 
+                                    style="width: 100%; height: 100%; border: none;" 
+                                    title="Interactive Solution Plot"></iframe>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if solution_plot_static %}
+                    <div class="col-md-6">
+                        <h6>Static Plot</h6>
+                        <div class="text-center">
+                            <img src="{% static solution_plot_static %}" 
+                                 style="max-width: 100%; height: auto; border: 1px solid #ccc; border-radius: 5px;" 
+                                 alt="Static Solution Plot" />
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
             {% endif %}
         
@@ -132,6 +212,40 @@
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
+    }
+
+    // Plot switching functions
+    function showInteractivePlot() {
+        document.getElementById("interactivePlotContainer").style.display = "block";
+        document.getElementById("staticPlotContainer").style.display = "none";
+        document.getElementById("bothPlotsContainer").style.display = "none";
+        
+        // Update button states
+        document.getElementById("interactiveBtn").className = "btn btn-primary active";
+        document.getElementById("staticBtn").className = "btn btn-outline-primary";
+        document.getElementById("bothBtn").className = "btn btn-outline-secondary";
+    }
+
+    function showStaticPlot() {
+        document.getElementById("interactivePlotContainer").style.display = "none";
+        document.getElementById("staticPlotContainer").style.display = "block";
+        document.getElementById("bothPlotsContainer").style.display = "none";
+        
+        // Update button states
+        document.getElementById("interactiveBtn").className = "btn btn-outline-primary";
+        document.getElementById("staticBtn").className = "btn btn-primary active";
+        document.getElementById("bothBtn").className = "btn btn-outline-secondary";
+    }
+
+    function showBothPlots() {
+        document.getElementById("interactivePlotContainer").style.display = "none";
+        document.getElementById("staticPlotContainer").style.display = "none";
+        document.getElementById("bothPlotsContainer").style.display = "block";
+        
+        // Update button states
+        document.getElementById("interactiveBtn").className = "btn btn-outline-primary";
+        document.getElementById("staticBtn").className = "btn btn-outline-primary";
+        document.getElementById("bothBtn").className = "btn btn-primary active";
     }
     </script>
     
