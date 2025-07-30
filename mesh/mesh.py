@@ -3,16 +3,29 @@ import mesh.forms as meshform
 
 def generate_mesh(mesh_type, request):
     """Generate FEniCS mesh based on the type and parameters."""
+    
+    def validate_positive_int(value, name):
+        """Validate that a value is a positive integer."""
+        if value <= 0:
+            raise ValueError(f"{name} must be a positive integer, got {value}")
+    
+    def validate_coordinate_range(x0, x1, axis):
+        """Validate that coordinates form a valid range."""
+        if x1 <= x0:
+            raise ValueError(f"{axis} coordinates invalid: x1 ({x1}) must be greater than x0 ({x0})")
+    
     if mesh_type == 'interval':
         data = meshform.IntervalMesh(request.POST)
         if data.is_valid():
             interval_n = data.cleaned_data['interval_n']
             interval_x0 = float(data.cleaned_data['interval_x0'])
             interval_x1 = float(data.cleaned_data['interval_x1'])
+            
+            # Validation
+            validate_positive_int(interval_n, "Number of intervals")
+            validate_coordinate_range(interval_x0, interval_x1, "X")
         else:
-            interval_n = 0
-            interval_x0 = 0.0
-            interval_x1 = 0.0
+            raise ValueError("Invalid form data for interval mesh")
         mesh_str = f"{mesh_type},{interval_n},{interval_x0},{interval_x1}"
         return IntervalMesh(interval_n, interval_x0, interval_x1), mesh_str
     
@@ -25,13 +38,14 @@ def generate_mesh(mesh_type, request):
             rectangle_y1 = data.cleaned_data['rectangle_y1']
             rectangle_nx = data.cleaned_data['rectangle_nx']
             rectangle_ny = data.cleaned_data['rectangle_ny']
+            
+            # Validation
+            validate_positive_int(rectangle_nx, "Number of divisions in X")
+            validate_positive_int(rectangle_ny, "Number of divisions in Y")
+            validate_coordinate_range(rectangle_x0, rectangle_x1, "X")
+            validate_coordinate_range(rectangle_y0, rectangle_y1, "Y")
         else:
-            rectangle_x0 = 0
-            rectangle_y0 = 0
-            rectangle_x1 = 0
-            rectangle_y1 = 0
-            rectangle_nx = 0
-            rectangle_ny = 0
+            raise ValueError("Invalid form data for rectangle mesh")
         mesh_str = f"{mesh_type},{rectangle_x0},{rectangle_y0},{rectangle_x1},{rectangle_y1},{rectangle_nx},{rectangle_ny}"
         return RectangleMesh(Point(rectangle_x0, rectangle_y0), Point(rectangle_x1, rectangle_y1), rectangle_nx, rectangle_ny), mesh_str
     
@@ -130,7 +144,7 @@ def show_mesh(mesh_str):
     
     elif mesh_list[0] == 'unit_interval':
         unit_nx = int(mesh_list[1])
-        return UnitIntervalMesh(unit_nx), mesh_str
+        return UnitIntervalMesh(unit_nx)
     
     elif mesh_list[0] == 'unit_square':
         unit_nx = int(mesh_list[1])

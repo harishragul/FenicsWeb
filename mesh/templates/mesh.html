@@ -60,18 +60,6 @@
                     </form>
                 {% endif %}
 
-                <!--
-                {% if interactive_mesh_plot %}
-                <h4 style="text-align: center;">Interactive Mesh</h4>
-                    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-                    <div id="plot" style="width: 600px; height: 600px; text-align: center;"></div>
-                    <script>
-                        var plotData = JSON.parse('{{ interactive_mesh_plot|escapejs }}');
-                        Plotly.newPlot('plot', plotData.data, plotData.layout);
-                    </script>
-                {% endif %}
-                -->
-
             </div>
 
             <div class="col">
