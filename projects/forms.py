@@ -65,32 +65,22 @@ class MeshStepForm(forms.Form):
     def clean(self):
         cleaned = super().clean()
         mt = cleaned.get('mesh_type', '')
-        errs = []
-        if mt in ('interval',):
-            for f in ('n', 'x0', 'x1'):
-                if cleaned.get(f) is None:
-                    errs.append(f'{f} is required for {mt}')
-        if mt in ('rectangle',):
-            for f in ('nx', 'ny', 'x0', 'y0', 'x1', 'y1'):
-                if cleaned.get(f) is None:
-                    errs.append(f'{f} is required for {mt}')
-        if mt in ('unit_interval',):
-            if cleaned.get('n') is None:
-                errs.append('n is required for unit_interval')
-        if mt in ('unit_square',):
-            for f in ('nx', 'ny'):
-                if cleaned.get(f) is None:
-                    errs.append(f'{f} is required for unit_square')
-        if mt in ('box',):
-            for f in ('nx', 'ny', 'nz', 'x0', 'y0', 'z0', 'x1', 'y1', 'z1'):
-                if cleaned.get(f) is None:
-                    errs.append(f'{f} is required for box')
-        if mt in ('unit_cube',):
-            for f in ('nx', 'ny', 'nz'):
-                if cleaned.get(f) is None:
-                    errs.append(f'{f} is required for unit_cube')
-        for e in errs:
-            self.add_error(None, e)
+
+        # Required fields per mesh type — only check what the user can actually fill in.
+        REQUIRED = {
+            'interval':      ['n', 'x0', 'x1'],
+            'unit_interval': ['n'],
+            'rectangle':     ['nx', 'ny', 'x0', 'x1', 'y0', 'y1'],
+            'unit_square':   ['nx', 'ny'],
+            'box':           ['nx', 'ny', 'nz', 'x0', 'x1', 'y0', 'y1', 'z0', 'z1'],
+            'unit_cube':     ['nx', 'ny', 'nz'],
+        }
+        for f in REQUIRED.get(mt, []):
+            val = cleaned.get(f)
+            if val is None and f not in self.errors:
+                # Use add_error on the field itself so the input is highlighted red
+                label = self.fields[f].label or f
+                self.add_error(f, f'This field is required for {mt}.')
         return cleaned
 
 
