@@ -155,15 +155,58 @@ matplotlib.use("Agg")
 STATIC_DIR = os.path.join(BASE_DIR, 'static') 
 
 def generate_mesh_plot(mesh):
-    plot(mesh)
+    """Plot mesh topology using direct matplotlib (avoids FEniCS gca() compat issue)."""
+    import matplotlib.tri as mtri
+    import numpy as np
 
-    if not os.path.exists(STATIC_DIR):
-        os.makedirs(STATIC_DIR)
+    coords = mesh.coordinates()
+    cells = mesh.cells()
+    dim = mesh.geometry().dim()
 
+    os.makedirs(STATIC_DIR, exist_ok=True)
     plot_filename = os.path.join(STATIC_DIR, 'mesh_plot.png')
-    plt.savefig(plot_filename)
-    plt.close()
 
+    if dim == 1:
+        fig, ax = plt.subplots(figsize=(8, 3))
+        x = coords.flatten()
+        ax.scatter(x, np.zeros_like(x), s=15, color='steelblue', zorder=3)
+        for cell in cells:
+            ax.plot(coords[cell, 0], [0, 0], 'steelblue', linewidth=1.5)
+        ax.set_xlabel('x')
+        ax.set_yticks([])
+        ax.set_title(f'1D Mesh  ({mesh.num_cells()} cells)')
+
+    elif dim == 2:
+        fig, ax = plt.subplots(figsize=(7, 6))
+        triang = mtri.Triangulation(coords[:, 0], coords[:, 1], cells)
+        ax.triplot(triang, color='steelblue', linewidth=0.6)
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_aspect('equal')
+        ax.set_title(f'2D Mesh  ({mesh.num_cells()} cells)')
+
+    elif dim == 3:
+        fig = plt.figure(figsize=(8, 6))
+        ax = fig.add_subplot(111, projection='3d')
+        plotted = 0
+        for cell in cells:
+            verts = coords[cell]
+            n = len(cell)
+            for i in range(n):
+                for j in range(i + 1, n):
+                    ax.plot(*zip(verts[i], verts[j]),
+                            color='steelblue', linewidth=0.3, alpha=0.4)
+            plotted += 1
+            if plotted > 500:   # cap edge drawing for large meshes
+                break
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        ax.set_zlabel('z')
+        ax.set_title(f'3D Mesh  ({mesh.num_cells()} cells)')
+
+    plt.tight_layout()
+    plt.savefig(plot_filename, dpi=100, bbox_inches='tight')
+    plt.close()
     return 'mesh_plot.png'
 
 import plotly.graph_objects as go
