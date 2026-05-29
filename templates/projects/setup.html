@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block page_title %} — {{ project.name }} · Setup{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'home' %}" class="text-decoration-none text-secondary small">Projects</a>
+  <span class="text-secondary mx-2">/</span>
+  <a href="{% url 'project_overview' project.pk %}" class="text-decoration-none text-secondary small">{{ project.name }}</a>
+  <span class="text-secondary mx-2">/</span>
+  <span class="small fw-medium">Setup</span>
+{% endblock %}
+
+{% block content %}
+<h4 class="fw-semibold mb-1">{{ project.name }}</h4>
+<p class="text-muted small mb-3">{{ project.get_solver_type_display }}</p>
+
+{% include 'partials/pipeline_bar.html' with active_step='setup' %}
+
+<div class="card">
+  <div class="card-body p-4">
+    <div class="d-flex align-items-center gap-3 mb-4">
+      <h6 class="fw-semibold mb-0">Boundary Conditions &amp; Parameters</h6>
+      <span class="badge bg-primary fs-6 px-3">{{ dimension }}</span>
+      <small class="text-muted">Dimension is set by the mesh and cannot be changed here.</small>
+    </div>
+
+    <form method="post">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <!-- Solver parameters -->
+      <div class="row g-3 mb-4">
+        <div class="col-6 col-sm-4">
+          <label class="form-label fw-medium small">Thermal conductivity k (W/m·K)</label>
+          {{ form.k }}
+        </div>
+        <div class="col-6 col-sm-4">
+          <label class="form-label fw-medium small">Volumetric source term f</label>
+          {{ form.f }}
+        </div>
+      </div>
+
+      <!-- Boundary condition cards — only active faces for this mesh's dimension -->
+      <h6 class="fw-semibold mb-2 border-top pt-3">Boundary Conditions</h6>
+      <p class="text-muted small mb-3">
+        Select type per face. <em>Robin</em> fields appear when Robin is chosen.
+      </p>
+
+      <div class="row g-3">
+        {% for face_group in face_groups %}
+        <div class="col-12 col-md-6">
+          <div class="card bg-light border-0 h-100">
+            <div class="card-body p-3">
+              <h6 class="small fw-semibold text-uppercase text-muted mb-2">
+                {{ face_group.label }}
+              </h6>
+
+              <div class="mb-2">
+                <label class="form-label small mb-1">BC Type</label>
+                {{ face_group.type_field }}
+              </div>
+
+              <div class="bc-value-row mb-2">
+                <label class="form-label small mb-1 value-label">Temperature (K)</label>
+                {{ face_group.value_field }}
+              </div>
+
+              <div class="bc-robin-row" style="display:none;">
+                <div class="row g-2">
+                  <div class="col">
+                    <label class="form-label small mb-1">h (conv. coeff.)</label>
+                    {{ face_group.h_field }}
+                  </div>
+                  <div class="col">
+                    <label class="form-label small mb-1">T∞ (ambient K)</label>
+                    {{ face_group.u_inf_field }}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <div class="d-flex gap-2 mt-4">
+        <a href="{% url 'project_mesh' project.pk %}" class="btn btn-outline-secondary">← Mesh</a>
+        <button type="submit" class="btn btn-primary flex-grow-1">Save & Go to Overview →</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Show/hide Robin-specific fields based on BC type selection
+document.querySelectorAll('select[id$="_type"]').forEach(sel => {
+  function toggle() {
+    const card    = sel.closest('.card-body');
+    const isRobin   = sel.value === 'robin';
+    const isNeumann = sel.value === 'neumann';
+    card.querySelector('.bc-value-row').style.display = isRobin ? 'none' : 'block';
+    card.querySelector('.bc-robin-row').style.display = isRobin ? 'block' : 'none';
+    const lbl = card.querySelector('.value-label');
+    if (lbl) lbl.textContent = isNeumann ? 'Heat flux q' : 'Temperature (K)';
+  }
+  sel.addEventListener('change', toggle);
+  toggle();
+});
+</script>
+{% endblock %}

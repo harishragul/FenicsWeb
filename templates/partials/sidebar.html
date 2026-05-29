@@ -1,0 +1,47 @@
+<div class="d-flex flex-column p-3" style="min-height:100vh; background:#1a1f2e;">
+  <a href="{% url 'home' %}" class="d-flex align-items-center mb-4 text-decoration-none">
+    <span class="fs-5 fw-semibold text-white">🔥 FenicsWeb</span>
+  </a>
+
+  <p class="text-uppercase text-secondary small fw-semibold mb-2 ms-1" style="letter-spacing:.08em;">Solvers</p>
+  <ul class="nav nav-pills flex-column mb-3">
+    <li class="nav-item">
+      <a href="{% url 'project_create' %}?solver=steady_conduction"
+         class="nav-link text-white d-flex align-items-center gap-2
+                {% if active_solver == 'steady_conduction' %}active{% endif %}">
+        <span>🌡</span> Steady Conduction
+      </a>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link text-secondary d-flex align-items-center gap-2" title="Coming in Phase 2">
+        <span>💨</span> Convection-Diffusion <span class="badge bg-secondary ms-auto" style="font-size:.6rem;">soon</span>
+      </span>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link text-secondary d-flex align-items-center gap-2" title="Coming in Phase 3">
+        <span>⏱</span> Transient Heat <span class="badge bg-secondary ms-auto" style="font-size:.6rem;">soon</span>
+      </span>
+    </li>
+  </ul>
+
+  <p class="text-uppercase text-secondary small fw-semibold mb-2 ms-1 mt-2" style="letter-spacing:.08em;">Tools</p>
+  <ul class="nav nav-pills flex-column mb-auto">
+    <li class="nav-item">
+      <a href="{% url 'validation' %}"
+         class="nav-link text-white d-flex align-items-center gap-2
+                {% if active_solver == 'validation' %}active{% endif %}">
+        <span>📊</span> Validation
+      </a>
+    </li>
+    <li class="nav-item">
+      <span class="nav-link text-secondary d-flex align-items-center gap-2" title="Coming in Phase 6">
+        <span>🔍</span> Inverse Problem <span class="badge bg-secondary ms-auto" style="font-size:.6rem;">soon</span>
+      </span>
+    </li>
+  </ul>
+
+  <hr class="text-secondary">
+  <a href="{% url 'home' %}" class="nav-link text-secondary d-flex align-items-center gap-2">
+    <span>🏠</span> All Projects
+  </a>
+</div>

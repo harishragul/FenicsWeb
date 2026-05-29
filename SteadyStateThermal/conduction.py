@@ -160,11 +160,12 @@ def solve_conduction(dimension, mesh, left_bc, right_bc, top_bc, bottom_bc,
     return u_sol, solution_list
 
 
-def generate_solution_plot(u_sol, mesh):
+def generate_solution_plot(u_sol, mesh, output_dir=None):
     """Plot the temperature field; dispatch on mesh dimension. Return filename."""
     dim = mesh.geometry().dim()
-    os.makedirs(STATIC_DIR, exist_ok=True)
-    plot_filename = os.path.join(STATIC_DIR, 'solution_plot.png')
+    target_dir = output_dir if output_dir is not None else STATIC_DIR
+    os.makedirs(target_dir, exist_ok=True)
+    plot_filename = os.path.join(target_dir, 'solution_plot.png')
 
     plt.figure(figsize=(8, 6))
 

@@ -1,0 +1,48 @@
+{% comment %}
+  Expects: project, active_step ('mesh'|'setup'|'solve')
+{% endcomment %}
+<div class="d-flex align-items-center gap-0 mb-4">
+  {% with steps=project.step_status %}
+
+  {# Mesh step #}
+  <a href="{% url 'project_mesh' project.pk %}"
+     class="btn btn-sm d-flex align-items-center gap-1 px-3 py-2
+            {% if active_step == 'mesh' %}btn-primary
+            {% elif steps.mesh %}btn-success
+            {% else %}btn-outline-secondary disabled{% endif %}">
+    {% if steps.mesh and active_step != 'mesh' %}✓{% else %}⬡{% endif %}
+    Mesh
+  </a>
+
+  <div class="flex-grow-1 border-top border-2
+              {% if steps.setup %}border-success{% else %}border-secondary{% endif %}"
+       style="max-width:60px;"></div>
+
+  {# Setup step #}
+  <a href="{% if steps.mesh %}{% url 'project_setup' project.pk %}{% else %}#{% endif %}"
+     class="btn btn-sm d-flex align-items-center gap-1 px-3 py-2
+            {% if active_step == 'setup' %}btn-primary
+            {% elif steps.setup %}btn-success
+            {% elif steps.mesh %}btn-outline-primary
+            {% else %}btn-outline-secondary disabled{% endif %}">
+    {% if steps.setup and active_step != 'setup' %}✓{% else %}⬡{% endif %}
+    Setup
+  </a>
+
+  <div class="flex-grow-1 border-top border-2
+              {% if steps.solve %}border-success{% else %}border-secondary{% endif %}"
+       style="max-width:60px;"></div>
+
+  {# Solve step #}
+  <a href="{% if steps.setup %}{% url 'project_solve' project.pk %}{% else %}#{% endif %}"
+     class="btn btn-sm d-flex align-items-center gap-1 px-3 py-2
+            {% if active_step == 'solve' %}btn-primary
+            {% elif steps.solve %}btn-success
+            {% elif steps.setup %}btn-outline-primary
+            {% else %}btn-outline-secondary disabled{% endif %}">
+    {% if steps.solve and active_step != 'solve' %}✓{% else %}▶{% endif %}
+    Solve
+  </a>
+
+  {% endwith %}
+</div>

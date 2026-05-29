@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block page_title %} — {{ project.name }}{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'home' %}" class="text-decoration-none text-secondary small">Projects</a>
+  <span class="text-secondary mx-2">/</span>
+  <span class="small fw-medium">{{ project.name }}</span>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+  <div>
+    <h3 class="fw-semibold mb-0">{{ project.name }}</h3>
+    <small class="text-muted">{{ project.get_solver_type_display }}</small>
+  </div>
+  <span class="badge fs-6
+    {% if project.status == 'solved' %}bg-success
+    {% elif project.status == 'setup_done' %}bg-primary
+    {% elif project.status == 'mesh_done' %}bg-warning text-dark
+    {% else %}bg-secondary{% endif %}">
+    {{ project.get_status_display }}
+  </span>
+</div>
+
+<!-- Pipeline bar -->
+{% include 'partials/pipeline_bar.html' with active_step='none' %}
+
+<div class="row g-3 mt-1">
+
+  <!-- Mesh card -->
+  <div class="col-12 col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="card-title mb-0 fw-semibold">⬡ Mesh</h6>
+          <a href="{% url 'project_mesh' project.pk %}" class="btn btn-sm btn-outline-primary">
+            {% if project.step_status.mesh %}Edit{% else %}Define{% endif %}
+          </a>
+        </div>
+        {% if project.step_status.mesh %}
+          {% with m=project.mesh_config %}
+          <dl class="mb-0 small">
+            <dt class="text-muted">Type</dt><dd>{{ m.mesh_type }}</dd>
+            {% for k, v in m.mesh_params.items %}
+              {% if k != 'mesh_type' %}
+                <dt class="text-muted">{{ k }}</dt><dd>{{ v }}</dd>
+              {% endif %}
+            {% endfor %}
+          </dl>
+          {% if project.mesh_plot_url %}
+            <img src="{{ project.mesh_plot_url }}" class="img-fluid mt-2 rounded" alt="Mesh">
+          {% endif %}
+          {% endwith %}
+        {% else %}
+          <p class="text-muted small mb-0">Not configured.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Setup card -->
+  <div class="col-12 col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="card-title mb-0 fw-semibold">⚙ Setup</h6>
+          {% if project.step_status.mesh %}
+          <a href="{% url 'project_setup' project.pk %}" class="btn btn-sm btn-outline-primary">
+            {% if project.step_status.setup %}Edit{% else %}Define{% endif %}
+          </a>
+          {% endif %}
+        </div>
+        {% if project.step_status.setup %}
+          {% with s=project.setup_config %}
+          <dl class="mb-0 small">
+            <dt class="text-muted">Dimension</dt><dd>{{ s.dimension }}</dd>
+            <dt class="text-muted">k</dt><dd>{{ s.solver_params.k }} W/m·K</dd>
+            <dt class="text-muted">f</dt><dd>{{ s.solver_params.f }}</dd>
+            {% for face, cfg in s.bc_config.items %}
+              <dt class="text-muted">{{ face|capfirst }}</dt>
+              <dd>{{ cfg.type|capfirst }}
+                {% if cfg.type == 'dirichlet' %}= {{ cfg.value }} K
+                {% elif cfg.type == 'neumann' %}q = {{ cfg.value }}
+                {% elif cfg.type == 'robin' %}h={{ cfg.h }}, T∞={{ cfg.u_inf }}{% endif %}
+              </dd>
+            {% endfor %}
+          </dl>
+          {% endwith %}
+        {% else %}
+          <p class="text-muted small mb-0">
+            {% if project.step_status.mesh %}Ready to configure.{% else %}Complete mesh first.{% endif %}
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Solve card -->
+  <div class="col-12 col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="card-title mb-0 fw-semibold">▶ Solve</h6>
+          {% if project.step_status.setup %}
+          <a href="{% url 'project_solve' project.pk %}" class="btn btn-sm btn-success">
+            {% if project.step_status.solve %}Results{% else %}Run ▶{% endif %}
+          </a>
+          {% endif %}
+        </div>
+        {% if project.step_status.solve %}
+          {% with r=project.result %}
+          <dl class="mb-0 small">
+            <dt class="text-muted">Solved</dt><dd>{{ r.solved_at|date:"d M Y, H:i" }}</dd>
+            {% if r.solve_time_s %}
+            <dt class="text-muted">Time</dt><dd>{{ r.solve_time_s|floatformat:2 }} s</dd>
+            {% endif %}
+          </dl>
+          {% if project.solution_plot_url %}
+            <img src="{{ project.solution_plot_url }}" class="img-fluid mt-2 rounded" alt="Solution">
+          {% endif %}
+          {% endwith %}
+        {% else %}
+          <p class="text-muted small mb-0">
+            {% if project.step_status.setup %}Ready to solve.{% else %}Complete setup first.{% endif %}
+          </p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

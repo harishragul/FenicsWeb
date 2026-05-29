@@ -130,7 +130,7 @@ def show_mesh(mesh_str):
     
     elif mesh_list[0] == 'unit_interval':
         unit_nx = int(mesh_list[1])
-        return UnitIntervalMesh(unit_nx), mesh_str
+        return UnitIntervalMesh(unit_nx)
     
     elif mesh_list[0] == 'unit_square':
         unit_nx = int(mesh_list[1])
@@ -154,7 +154,43 @@ matplotlib.use("Agg")
 
 STATIC_DIR = os.path.join(BASE_DIR, 'static') 
 
-def generate_mesh_plot(mesh):
+def build_mesh_from_params(mesh_type, params):
+    """Create a FEniCS mesh from a plain dict — no Django request needed."""
+    if mesh_type == 'interval':
+        mesh = IntervalMesh(params['n'], params['x0'], params['x1'])
+        mesh_str = f"interval,{params['n']},{params['x0']},{params['x1']}"
+    elif mesh_type == 'unit_interval':
+        mesh = UnitIntervalMesh(params['n'])
+        mesh_str = f"unit_interval,{params['n']}"
+    elif mesh_type == 'rectangle':
+        mesh = RectangleMesh(
+            Point(params['x0'], params['y0']),
+            Point(params['x1'], params['y1']),
+            params['nx'], params['ny'],
+        )
+        mesh_str = (f"rectangle,{params['x0']},{params['y0']},"
+                    f"{params['x1']},{params['y1']},{params['nx']},{params['ny']}")
+    elif mesh_type == 'unit_square':
+        mesh = UnitSquareMesh(params['nx'], params['ny'])
+        mesh_str = f"unit_square,{params['nx']},{params['ny']}"
+    elif mesh_type == 'box':
+        mesh = BoxMesh(
+            Point(params['x0'], params['y0'], params['z0']),
+            Point(params['x1'], params['y1'], params['z1']),
+            params['nx'], params['ny'], params['nz'],
+        )
+        mesh_str = (f"box,{params['x0']},{params['y0']},{params['z0']},"
+                    f"{params['x1']},{params['y1']},{params['z1']},"
+                    f"{params['nx']},{params['ny']},{params['nz']}")
+    elif mesh_type == 'unit_cube':
+        mesh = UnitCubeMesh(params['nx'], params['ny'], params['nz'])
+        mesh_str = f"unit_cube,{params['nx']},{params['ny']},{params['nz']}"
+    else:
+        raise ValueError(f"Unknown mesh type: {mesh_type}")
+    return mesh, mesh_str
+
+
+def generate_mesh_plot(mesh, output_dir=None):
     """Plot mesh topology using direct matplotlib (avoids FEniCS gca() compat issue)."""
     import matplotlib.tri as mtri
     import numpy as np
@@ -163,8 +199,9 @@ def generate_mesh_plot(mesh):
     cells = mesh.cells()
     dim = mesh.geometry().dim()
 
-    os.makedirs(STATIC_DIR, exist_ok=True)
-    plot_filename = os.path.join(STATIC_DIR, 'mesh_plot.png')
+    target_dir = output_dir if output_dir is not None else STATIC_DIR
+    os.makedirs(target_dir, exist_ok=True)
+    plot_filename = os.path.join(target_dir, 'mesh_plot.png')
 
     if dim == 1:
         fig, ax = plt.subplots(figsize=(8, 3))
@@ -208,6 +245,9 @@ def generate_mesh_plot(mesh):
     plt.savefig(plot_filename, dpi=100, bbox_inches='tight')
     plt.close()
     return 'mesh_plot.png'
+
+
+
 
 import plotly.graph_objects as go
 import json, plotly

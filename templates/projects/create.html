@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block page_title %} — New Project{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'home' %}" class="text-decoration-none text-secondary small">Projects</a>
+  <span class="text-secondary mx-2">/</span>
+  <span class="small">New Project</span>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-6 col-lg-5">
+    <div class="card">
+      <div class="card-body p-4">
+        <h4 class="card-title fw-semibold mb-4">Create New Project</h4>
+
+        <form method="post">
+          {% csrf_token %}
+
+          <div class="mb-3">
+            <label class="form-label fw-medium">Project Name</label>
+            {{ form.name }}
+            {% if form.name.errors %}
+              <div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-4">
+            <label class="form-label fw-medium">Solver Type</label>
+            {{ form.solver_type }}
+            {% if form.solver_type.errors %}
+              <div class="text-danger small mt-1">{{ form.solver_type.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <div class="d-flex gap-2">
+            <a href="{% url 'home' %}" class="btn btn-outline-secondary flex-grow-1">Cancel</a>
+            <button type="submit" class="btn btn-primary flex-grow-1">Create → Define Mesh</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

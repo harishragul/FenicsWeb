@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block page_title %} — {{ project.name }} · Results{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'home' %}" class="text-decoration-none text-secondary small">Projects</a>
+  <span class="text-secondary mx-2">/</span>
+  <a href="{% url 'project_overview' project.pk %}" class="text-decoration-none text-secondary small">{{ project.name }}</a>
+  <span class="text-secondary mx-2">/</span>
+  <span class="small fw-medium">Solve</span>
+{% endblock %}
+
+{% block content %}
+<h4 class="fw-semibold mb-1">{{ project.name }}</h4>
+<p class="text-muted small mb-3">{{ project.get_solver_type_display }}</p>
+
+{% include 'partials/pipeline_bar.html' with active_step='solve' %}
+
+<!-- Run button -->
+{% if not project.step_status.solve %}
+<div class="card mb-4">
+  <div class="card-body d-flex align-items-center justify-content-between p-4">
+    <div>
+      <h6 class="fw-semibold mb-1">Ready to solve</h6>
+      <small class="text-muted">Mesh and setup are complete. Click Run to execute the FEM solver.</small>
+    </div>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success btn-lg">▶ Run Solver</button>
+    </form>
+  </div>
+</div>
+{% else %}
+<div class="d-flex gap-2 mb-4">
+  <form method="post" class="m-0">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-success">↺ Re-run</button>
+  </form>
+  <a href="{% url 'project_overview' project.pk %}" class="btn btn-outline-secondary">← Overview</a>
+</div>
+{% endif %}
+
+{% if project.step_status.solve %}
+{% with r=project.result %}
+
+<!-- Plots -->
+<div class="row g-3 mb-4">
+  <div class="col-12 col-md-6">
+    <div class="card">
+      <div class="card-body text-center">
+        <h6 class="fw-semibold mb-2">Mesh</h6>
+        <img src="{{ project.mesh_plot_url }}" class="img-fluid rounded" alt="Mesh">
+      </div>
+    </div>
+  </div>
+  <div class="col-12 col-md-6">
+    <div class="card">
+      <div class="card-body text-center">
+        <h6 class="fw-semibold mb-2">Temperature Field</h6>
+        <img src="{{ project.solution_plot_url }}" class="img-fluid rounded" alt="Temperature distribution">
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card text-center">
+      <div class="card-body py-3">
+        <div class="fs-4 fw-bold text-primary">{{ r.solved_at|date:"H:i" }}</div>
+        <div class="small text-muted">Solved at</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center">
+      <div class="card-body py-3">
+        <div class="fs-4 fw-bold text-success">{{ r.solve_time_s|floatformat:2 }}s</div>
+        <div class="small text-muted">Solve time</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center">
+      <div class="card-body py-3">
+        <div class="fs-4 fw-bold">{{ r.solution_data|length }}</div>
+        <div class="small text-muted">Nodes</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card text-center">
+      <div class="card-body py-3">
+        <div class="fs-4 fw-bold">{{ project.setup_config.dimension }}</div>
+        <div class="small text-muted">Dimension</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Solution data table -->
+<div class="card">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h6 class="fw-semibold mb-0">Solution Data</h6>
+      <div class="d-flex gap-2">
+        <input type="text" id="searchInput" class="form-control form-control-sm"
+               placeholder="Search…" style="width:180px;" onkeyup="filterTable()">
+        <button class="btn btn-sm btn-outline-secondary" onclick="downloadCSV()">↓ CSV</button>
+      </div>
+    </div>
+    <div style="max-height:320px; overflow-y:auto;">
+      <table class="table table-sm table-hover mb-0" id="solutionTable">
+        <thead class="table-light sticky-top">
+          <tr>
+            <th>Coordinates</th>
+            <th>Temperature (K)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in r.solution_data %}
+          <tr>
+            <td class="font-monospace small">{{ row.0 }}</td>
+            <td class="font-monospace small">{{ row.1|floatformat:6 }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endwith %}
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function filterTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  document.querySelectorAll('#solutionTable tbody tr').forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+function downloadCSV() {
+  const rows = document.querySelectorAll('#solutionTable tr');
+  let csv = '';
+  rows.forEach(r => {
+    const cells = [...r.querySelectorAll('th,td')].map(c => c.innerText);
+    csv += cells.join(',') + '\n';
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+  a.download = '{{ project.name|slugify }}_solution.csv';
+  a.click();
+}
+</script>
+{% endblock %}

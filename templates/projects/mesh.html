@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block page_title %} — {{ project.name }} · Mesh{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'home' %}" class="text-decoration-none text-secondary small">Projects</a>
+  <span class="text-secondary mx-2">/</span>
+  <a href="{% url 'project_overview' project.pk %}" class="text-decoration-none text-secondary small">{{ project.name }}</a>
+  <span class="text-secondary mx-2">/</span>
+  <span class="small fw-medium">Mesh</span>
+{% endblock %}
+
+{% block extra_css %}
+.mesh-field-group { display: none; }
+{% endblock %}
+
+{% block content %}
+<h4 class="fw-semibold mb-1">{{ project.name }}</h4>
+<p class="text-muted small mb-3">{{ project.get_solver_type_display }}</p>
+
+{% include 'partials/pipeline_bar.html' with active_step='mesh' %}
+
+<div class="row g-4">
+  <!-- Form -->
+  <div class="col-12 col-lg-5">
+    <div class="card">
+      <div class="card-body p-4">
+        <h6 class="fw-semibold mb-3">Define Mesh</h6>
+        <form method="post" id="meshForm">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label fw-medium small">Mesh Type</label>
+            {{ form.mesh_type }}
+          </div>
+
+          <!-- 1D fields -->
+          <div class="mesh-field-group" id="grp-1d">
+            <div class="mb-2">
+              <label class="form-label small">Number of cells (n)</label>{{ form.n }}
+            </div>
+            <div class="row g-2">
+              <div class="col"><label class="form-label small">x₀</label>{{ form.x0 }}</div>
+              <div class="col"><label class="form-label small">x₁</label>{{ form.x1 }}</div>
+            </div>
+          </div>
+
+          <!-- 2D fields -->
+          <div class="mesh-field-group" id="grp-2d">
+            <div class="row g-2 mb-2">
+              <div class="col"><label class="form-label small">nx</label>{{ form.nx }}</div>
+              <div class="col"><label class="form-label small">ny</label>{{ form.ny }}</div>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col"><label class="form-label small">x₀</label>{{ form.x0 }}</div>
+              <div class="col"><label class="form-label small">x₁</label>{{ form.x1 }}</div>
+            </div>
+            <div class="row g-2">
+              <div class="col"><label class="form-label small">y₀</label>{{ form.y0 }}</div>
+              <div class="col"><label class="form-label small">y₁</label>{{ form.y1 }}</div>
+            </div>
+          </div>
+
+          <!-- 3D fields -->
+          <div class="mesh-field-group" id="grp-3d">
+            <div class="row g-2 mb-2">
+              <div class="col"><label class="form-label small">nx</label>{{ form.nx }}</div>
+              <div class="col"><label class="form-label small">ny</label>{{ form.ny }}</div>
+              <div class="col"><label class="form-label small">nz</label>{{ form.nz }}</div>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col"><label class="form-label small">x₀</label>{{ form.x0 }}</div>
+              <div class="col"><label class="form-label small">x₁</label>{{ form.x1 }}</div>
+            </div>
+            <div class="row g-2 mb-2">
+              <div class="col"><label class="form-label small">y₀</label>{{ form.y0 }}</div>
+              <div class="col"><label class="form-label small">y₁</label>{{ form.y1 }}</div>
+            </div>
+            <div class="row g-2">
+              <div class="col"><label class="form-label small">z₀</label>{{ form.z0 }}</div>
+              <div class="col"><label class="form-label small">z₁</label>{{ form.z1 }}</div>
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <a href="{% url 'project_overview' project.pk %}" class="btn btn-outline-secondary">← Back</a>
+            <button type="submit" class="btn btn-primary flex-grow-1">Save & Continue →</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preview -->
+  <div class="col-12 col-lg-7">
+    {% if project.mesh_plot_url %}
+    <div class="card">
+      <div class="card-body text-center">
+        <h6 class="fw-semibold mb-2">Current Mesh Preview</h6>
+        <img src="{{ project.mesh_plot_url }}" class="img-fluid rounded" alt="Mesh preview">
+      </div>
+    </div>
+    {% else %}
+    <div class="card h-100 d-flex align-items-center justify-content-center text-muted" style="min-height:200px;">
+      <div class="text-center p-4">
+        <div style="font-size:2rem;">⬡</div>
+        <p class="mt-2 mb-0 small">Mesh preview will appear after saving</p>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const DIM_MAP = {
+  'interval':      '1d',
+  'unit_interval': '1d',
+  'rectangle':     '2d',
+  'unit_square':   '2d',
+  'box':           '3d',
+  'unit_cube':     '3d',
+};
+function showMeshFields(mt) {
+  ['1d','2d','3d'].forEach(g => document.getElementById('grp-'+g).style.display = 'none');
+  const grp = DIM_MAP[mt];
+  if (grp) document.getElementById('grp-'+grp).style.display = 'block';
+}
+const sel = document.getElementById('id_mesh_type');
+sel.addEventListener('change', () => showMeshFields(sel.value));
+showMeshFields(sel.value);
+</script>
+{% endblock %}
