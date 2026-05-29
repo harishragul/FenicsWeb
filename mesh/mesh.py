@@ -171,13 +171,27 @@ import json, plotly
 import plotly.utils
 import json
 
-def generate_interactive_mesh_plot(mesh):
+def generate_interactive_mesh_plot(mesh, u_sol=None):
+    """Return a Plotly Mesh3d figure as JSON. Colours vertices by u_sol if provided."""
     coords = mesh.coordinates()
     connectivity = mesh.cells()
 
-    fig = go.Figure(data=[go.Mesh3d(
-        x=coords[:, 0], y=coords[:, 1], z=coords[:, 2] if mesh.geometry().dim() == 3 else [0] * len(coords),
-        i=connectivity[:, 0], j=connectivity[:, 1], k=connectivity[:, 2]
-    )])
+    intensity = u_sol.compute_vertex_values(mesh).tolist() if u_sol is not None else None
 
+    mesh3d_kwargs = dict(
+        x=coords[:, 0].tolist(),
+        y=coords[:, 1].tolist(),
+        z=coords[:, 2].tolist() if mesh.geometry().dim() == 3 else [0] * len(coords),
+        i=connectivity[:, 0].tolist(),
+        j=connectivity[:, 1].tolist(),
+        k=connectivity[:, 2].tolist(),
+        opacity=0.8,
+    )
+    if intensity is not None:
+        mesh3d_kwargs['intensity'] = intensity
+        mesh3d_kwargs['colorscale'] = 'Viridis'
+        mesh3d_kwargs['colorbar'] = {'title': 'Temperature (K)'}
+
+    fig = go.Figure(data=[go.Mesh3d(**mesh3d_kwargs)])
+    fig.update_layout(margin=dict(l=0, r=0, b=0, t=30))
     return json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)

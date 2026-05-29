@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FenicsWeb — Convergence Validation</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <img src="{% static 'img/fenics_logo.png' %}" alt="logo" height="50px">
+        <a class="navbar-brand" href="#">FenicsWeb</a>
+        <a class="nav-link" href="{% url 'generate_mesh' %}">Mesh</a>
+        <a class="nav-link" href="{% url 'conduction' %}">Solver</a>
+        <a class="nav-link active" href="{% url 'validation' %}">Validation</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2>1D Convergence Validation</h2>
+    <p class="text-muted">
+        Verifies that the P1 finite element solver converges at the correct theoretical rate
+        by comparing against an exact analytical solution.
+    </p>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Problem</h6>
+                    <code>{{ problem }}</code>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Exact Solution</h6>
+                    <code>{{ exact }}</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h5>h-Refinement Results</h5>
+    <p>Expected L2 convergence rate: <strong>{{ expected_rate }}</strong></p>
+
+    <table class="table table-bordered table-hover w-auto">
+        <thead class="table-dark">
+            <tr>
+                <th>Mesh cells (n)</th>
+                <th>Cell size (h)</th>
+                <th>L2 error ‖u − u_h‖</th>
+                <th>Convergence rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+            <tr>
+                <td>{{ row.n }}</td>
+                <td>{{ row.h }}</td>
+                <td><code>{{ row.l2_error }}</code></td>
+                <td>
+                    {% if row.rate == '—' %}
+                        —
+                    {% else %}
+                        <span class="{% if row.rate|floatformat:1 == '2.0' %}text-success{% else %}text-warning{% endif %}">
+                            {{ row.rate }}
+                        </span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="alert alert-info mt-3">
+        <strong>Interpretation:</strong>
+        A convergence rate of ≈ 2.0 confirms that the solver is correctly implementing P1 Galerkin FEM.
+        This rate is the theoretical optimum for linear elements solving a problem with smooth solution.
+    </div>
+
+    <a class="btn btn-primary" href="{% url 'conduction' %}">← Back to Solver</a>
+</div>
+</body>
+</html>
