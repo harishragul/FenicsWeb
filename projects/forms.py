@@ -91,6 +91,7 @@ def _bc_fields(prefix):
             choices=BC_TYPES,
             label=f'{prefix.capitalize()} BC type',
             initial='dirichlet',
+            required=False,   # face may not be rendered (e.g. front/back for 2D mesh)
             widget=forms.Select(attrs={**_sel, 'class': 'form-select bc-type-select',
                                        'data-face': prefix}),
         ),

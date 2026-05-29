@@ -73,7 +73,7 @@ def _extract_setup(form, dimension):
     d  = form.cleaned_data
     bc = {}
     for face in FACES_3D:
-        ftype = d.get(f'{face}_type', 'dirichlet')
+        ftype = d.get(f'{face}_type') or 'dirichlet'  # absent = face not rendered = treat as Dirichlet 0
         entry = {'type': ftype}
         if ftype in ('dirichlet', 'neumann'):
             entry['value'] = float(d.get(f'{face}_value') or 0.0)
