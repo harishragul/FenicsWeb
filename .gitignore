@@ -1,18 +1,60 @@
-# Ignore Python bytecode files
+# Python bytecode
 *.pyc
 *.pyo
+*.pyd
 __pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+.eggs/
 
-# Ignore virtual environment directories
+# Virtual environments
 venv/
 env/
 ENV/
 .venv/
 .ENV/
 
-# Ignore IDE/editor specific files
+# Django
+*.sqlite3
+/static/
+/media/
+/staticfiles/
+
+# FEniCS output files
+*.pvd
+*.vtu
+*.xdmf
+*.h5
+*.xml
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Environment / secrets
+.env
+*.env
+
+# IDE
 .vscode/
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.iml
 
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
