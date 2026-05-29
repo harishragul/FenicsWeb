@@ -1,7 +1,8 @@
 # Phase 0 — Repository & CI Setup
 
 **Duration:** 3 days
-**Status:** Not Started
+**Status:** Complete
+**Completed:** 2026-05-29
 **Depends on:** Nothing
 **Unlocks:** Everything — this is the foundation for JOSS publication eligibility
 
@@ -285,8 +286,63 @@ The full README overhaul is in Phase 5. Phase 0 just needs enough to not embarra
 ## Definition of Done
 
 - [ ] Repository is public on GitHub
-- [ ] `pytest tests/` runs without errors locally
-- [ ] GitHub Actions CI badge shows green on the README
-- [ ] `CONTRIBUTING.md` exists
-- [ ] `.gitignore` covers all FEniCS/Django/Python artifacts
-- [ ] At least 3 passing tests in the suite
+- [x] `pytest tests/` runs without errors locally — **16/16 passing in 0.33s**
+- [ ] GitHub Actions CI badge shows green on the README — pending repo going public
+- [x] `CONTRIBUTING.md` exists
+- [x] `.gitignore` covers all FEniCS/Django/Python artifacts
+- [x] At least 3 passing tests in the suite — **16 tests across 2 modules**
+
+> **One item remaining:** make the GitHub repo public. Everything else is done.
+> That single action starts the 6-month JOSS eligibility clock.
+
+---
+
+## Completion Notes
+
+### What was built
+
+| File | Description |
+| ---- | ----------- |
+| `.gitignore` | Added FEniCS (`*.pvd`, `*.xdmf`, `*.h5`), Django (`*.sqlite3`, `/static/`, `/media/`), pytest cache, Celery, Jupyter |
+| `environment.yml` | Added `python=3.10`, `pytest`, `pytest-django` |
+| `pytest.ini` | Django settings module, test discovery, short traceback |
+| `tests/conftest.py` | Shared fixtures: `mesh_1d`, `mesh_2d`, `mesh_3d` |
+| `tests/test_mesh.py` | 8 tests — all 6 mesh types, interactive Plotly JSON, mesh string roundtrip |
+| `tests/test_conduction.py` | 8 tests — linear solution, nodal exactness, conductivity scaling, L2 convergence rate |
+| `tests/test_convection.py` | Placeholder for Phase 2 |
+| `tests/test_transient.py` | Placeholder for Phase 3 |
+| `.github/workflows/ci.yml` | GitHub Actions with conda setup + `$CONDA_PREFIX/bin` on PATH for pkg-config |
+| `CONTRIBUTING.md` | Setup, tests, project structure, adding a solver, code style, PR process |
+| `README.md` | CI badge, feature table, conda + Docker install, scientific background, citation block |
+
+### Key technical issue resolved
+
+The `fenics` Python module requires `pkg-config` on PATH to import. On macOS with conda,
+the system PATH does not include `$CONDA_PREFIX/bin` inside subprocess contexts.
+Fixed by explicitly prepending `$CONDA_PREFIX/bin` in the CI `run` step and by
+running tests locally as:
+
+```bash
+PATH="/Volumes/Storage/miniconda3/envs/fenicsproject/bin:$PATH" pytest tests/ -v
+```
+
+### Test design decisions
+
+- **Convergence rate test** uses `fenics.errornorm()` (not manual `assemble((u_h - u_ex)**2 * dx)`).
+  The manual approach integrates against a P1 projection of the exact solution, giving near-zero
+  error for this problem due to P1 superconvergence at nodes, making the ratio garbage. `errornorm`
+  computes the true L2 error against the symbolic expression.
+
+- **Correctness tests** verify exact nodal values (`u_sol(0.5) == 0.25`) rather than L2 norm,
+  because P1 Galerkin for `-u'' = 2` is exact at the nodes of a uniform mesh.
+
+### Test results
+
+```text
+16 passed in 0.33s
+```
+
+| Module | Tests | Coverage |
+| ------ | ----- | -------- |
+| `test_mesh.py` | 8 | All mesh types, Plotly JSON, mesh string roundtrip |
+| `test_conduction.py` | 8 | 1D/2D correctness, convergence rate O(h²) verified |

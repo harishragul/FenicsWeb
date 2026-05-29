@@ -27,7 +27,7 @@ JOSS requires a public repository with **at least 6 months of genuine commit his
 
 | Phase | Name | Status | Duration | Publication Impact |
 | ----- | ---- | ------ | -------- | ------------------ |
-| [Phase 0](phases/phase0.md) | Repo & CI Setup | Not Started | 3 days | **Starts 6-month JOSS clock** |
+| [Phase 0](phases/phase0.md) | Repo & CI Setup | **Complete** | 3 days | **Starts 6-month JOSS clock** |
 | [Phase 1](phases/phase1.md) | Foundation Repair | Not Started | 2 weeks | First validated result |
 | [Phase 2](phases/phase2.md) | Convection-Diffusion + SUPG | Not Started | 4 weeks | Core scientific contribution |
 | [Phase 3](phases/phase3.md) | Transient Heat Equation | Not Started | 4 weeks | Broadens solver scope |
