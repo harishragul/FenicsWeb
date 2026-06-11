@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'mesh',
     'SteadyStateThermal',
     'ConvectionDiffusion',
+    'TransientThermal',
     'projects',
 ]
 

@@ -8,5 +8,6 @@ urlpatterns = [
     path('',                    include('projects.urls')),
     path('SteadyStateThermal/', include('SteadyStateThermal.urls')),
     path('ConvectionDiffusion/', include('ConvectionDiffusion.urls')),
+    path('TransientThermal/',   include('TransientThermal.urls')),
     path('mesh/',               include('mesh.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FenicsWeb — Transient Heat Conduction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        .bottom-top-fields { display: none; }
+    </style>
+</head>
+
+<body>
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <img src="{% static 'img/fenics_logo.png' %}" alt="logo" height="50px">
+        <a class="navbar-brand" href="#">FenicsWeb</a>
+        <a class="nav-link" href="{% url 'generate_mesh' %}">Mesh</a>
+        <a class="nav-link" href="{% url 'conduction' %}">Conduction</a>
+        <a class="nav-link" href="{% url 'validation' %}">Validation</a>
+        <a class="nav-link" href="{% url 'convection' %}">Convection-Diffusion</a>
+        <a class="nav-link" href="{% url 'peclet_study' %}">Peclet Study</a>
+        <a class="nav-link active" href="{% url 'transient' %}">Transient</a>
+        <a class="nav-link" href="{% url 'scheme_comparison' %}">Scheme Comparison</a>
+    </div>
+</nav>
+
+<div class="container mt-3">
+    <h2>Transient Heat Conduction Solver</h2>
+    <p class="text-muted">
+        Solves <code>&rho; c<sub>p</sub> &part;u/&part;t = &nabla;&middot;(k&nabla;u) + f</code>
+        from <code>t=0</code> to <code>t=T</code> using either Backward Euler
+        (1st-order implicit) or Crank-Nicolson (2nd-order implicit) time
+        integration, with Dirichlet boundary conditions on every domain edge.
+    </p>
+    <p class="text-success"><strong class="text-dark">Status: </strong>{{ message }}</p>
+    <hr>
+
+    <div class="row">
+        <!-- Left col: form -->
+        <div class="col-md-4">
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button class="btn btn-primary" type="submit">Solve</button>
+            </form>
+        </div>
+
+        <!-- Right col: results -->
+        <div class="col-md-8">
+            {% if results %}
+            <div class="alert alert-info">
+                <strong>Time steps:</strong> {{ nsteps }}
+                (t = 0 to t = {{ form.cleaned_data.T|default:"T" }} with dt = {{ form.cleaned_data.dt|default:"dt" }})
+            </div>
+            {% endif %}
+
+            {% for result in results %}
+            <h5>{{ result.label }} solution</h5>
+
+            {% if dimension == '1D' %}
+            <div id="plot-{{ result.scheme }}" style="width: 100%; height: 450px;"></div>
+            <script>
+                (function () {
+                    var plotData = JSON.parse('{{ result.plotly_json|escapejs }}');
+                    Plotly.newPlot('plot-{{ result.scheme }}', {
+                        data: plotData.data,
+                        layout: plotData.layout,
+                        frames: plotData.frames
+                    });
+                })();
+            </script>
+            {% if result.animation %}
+            <p class="mt-2">
+                <a href="{% static result.animation %}?v={{ forloop.counter }}" target="_blank">
+                    Download animation (GIF)
+                </a>
+            </p>
+            {% endif %}
+            {% else %}
+            <img src="{% static result.snapshot_grid %}?v={{ forloop.counter }}" class="img-fluid mb-2" alt="{{ result.label }} snapshots">
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if results %}
+    <hr>
+    <h5>Final Solution Data (t = T)</h5>
+    <ul class="nav nav-tabs" role="tablist">
+        {% for result in results %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if forloop.first %}active{% endif %}"
+                    data-bs-toggle="tab" data-bs-target="#tab-{{ result.scheme }}" type="button">
+                {{ result.label }}
+            </button>
+        </li>
+        {% endfor %}
+    </ul>
+    <div class="tab-content mt-2">
+        {% for result in results %}
+        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="tab-{{ result.scheme }}">
+            <table class="table table-sm table-striped">
+                <thead><tr><th>Coordinates</th><th>u(x, T)</th></tr></thead>
+                <tbody>
+                    {% for data in result.final_values %}
+                    <tr>
+                        {% for item in data %}<td>{{ item }}</td>{% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Show/hide 2D-only fields (bottom_bc, top_bc) based on dimension select
+document.addEventListener('DOMContentLoaded', function () {
+    var dimSelect = document.getElementById('id_dimension');
+    if (!dimSelect) return;
+
+    function fieldGroup(name) {
+        var input = document.getElementById('id_' + name);
+        return input ? input.closest('p') : null;
+    }
+
+    var twoDOnly = ['bottom_bc', 'top_bc'].map(fieldGroup).filter(Boolean);
+
+    function toggle() {
+        var is2D = dimSelect.value === '2D';
+        twoDOnly.forEach(function (el) {
+            el.style.display = is2D ? 'block' : 'none';
+        });
+    }
+    dimSelect.addEventListener('change', toggle);
+    toggle();
+});
+</script>
+</body>
+</html>

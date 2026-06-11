@@ -240,10 +240,83 @@ Expected rates: 1.0 for BE, 2.0 for CN — this verifies both implementations.
 
 ## Definition of Done
 
-- [ ] Backward Euler time-stepping works for 1D and 2D
-- [ ] Crank-Nicolson time-stepping works for 1D and 2D
-- [ ] Snapshots saved to database
-- [ ] Browser time scrubber re-renders plot via AJAX without page reload
-- [ ] Animation GIF/MP4 export works
-- [ ] Temporal convergence table shows BE ≈ 1st-order, CN ≈ 2nd-order
-- [ ] Scheme comparison page built with exact-solution overlay
+- [x] Backward Euler time-stepping works for 1D and 2D
+- [x] Crank-Nicolson time-stepping works for 1D and 2D
+- [x] Snapshots saved to database — *design change, see Completion Notes*: snapshots are
+      embedded directly in the response (Plotly frames for 1D, a static snapshot grid for
+      2D) instead of a `TransientJob`/`TransientSnapshot` DB schema, per CLAUDE.md's
+      "no unnecessary persistence/backend complexity" guidance.
+- [x] Browser time scrubber re-renders plot via AJAX without page reload — *design
+      change*: 1D uses a client-side Plotly slider with all frames embedded in the page
+      (no AJAX/DB round trip needed); 2D uses a static multi-panel snapshot grid instead
+      of a scrubber (animated 2D payloads were judged too large for a web response).
+- [x] Animation GIF/MP4 export works — implemented for 1D (`generate_transient_animation`,
+      pillow GIF writer). Skipped for 2D, consistent with the snapshot-grid decision above.
+- [x] Temporal convergence table shows BE ≈ 1st-order, CN ≈ 2nd-order
+- [x] Scheme comparison page built with exact-solution overlay
+
+## Completion Notes
+
+### What was built
+
+- **`TransientThermal/` Django app** mirroring `ConvectionDiffusion/`: `forms.py`,
+  `solver.py`, `views.py`, `urls.py`, `templates/transient.html`,
+  `templates/scheme_comparison.html`. No `models.py` content (see DoD notes above).
+- **`solve_transient(dimension, mesh, rho, cp, k, f, T, dt, scheme, initial_condition,
+  left_bc, right_bc, bottom_bc, top_bc)`** — single solver function for 1D
+  (`UnitIntervalMesh`) and 2D (`UnitSquareMesh`) problems, returning
+  `(times, snapshots, coords, u_final)`. Both Backward Euler and Crank-Nicolson weak forms
+  are assembled with `lhs`/`rhs` exactly as drafted in §3.2, with Dirichlet BCs applied on
+  every domain edge using the mesh's own coordinate bounds (same pattern as
+  `ConvectionDiffusion.solve_convection_diffusion`).
+- **No-overshoot time-stepping**: `nsteps = max(1, round(T/dt))`, iterating
+  `t = step*dt` for `step = 1..nsteps`. The `while t <= T + 1e-10` loop drafted in §3.2
+  overshoots `T` whenever `T/dt` is non-integer (e.g. `dt=0.04, T=0.1` → 3 steps to
+  `t=0.12` instead of 2 steps to `t=0.08`), which corrupted the convergence comparison
+  during development — fixed before any UI/test code was written.
+- **Initial conditions**: a fixed `INITIAL_CONDITIONS['1D'|'2D']` dict maps the
+  user-selectable keys `'sine'`, `'gaussian'`, `'constant'` to hardcoded `Expression`
+  strings — never built from raw user input (FEniCS `Expression` is JIT-compiled C++).
+- **`exact_transient_1d(x, t, k, rho, cp)`** — analytical decay solution
+  `sin(πx)·exp(-π²kt/(ρcp))` for the 1D rod benchmark (§3.6/3.7).
+- **`scheme_comparison_1d(dt_values, T, k, rho, cp, n)`** — the temporal-convergence
+  benchmark. On a fixed `n=200` mesh (`h=0.005`, chosen so the `O(h²)` spatial error stays
+  below the temporal error), measured rates for `dt ∈ {0.02, 0.01, 0.005}` are
+  ≈0.95/0.97 for Backward Euler (expected `O(dt¹)`) and ≈1.95/1.80 for Crank-Nicolson
+  (expected `O(dt²)`).
+- **Visualization**: `generate_transient_plotly` (1D Plotly figure with one `go.Frame` per
+  time step + slider + play/pause buttons), `generate_transient_animation` (1D animated
+  GIF via `matplotlib.animation` + pillow), `generate_transient_snapshot_grid` (2D
+  `tripcolor` panel grid at evenly-spaced times), `generate_scheme_comparison_plot`
+  (two-panel BE/CN/exact comparison + log-log convergence plot with `O(dt)`/`O(dt²)`
+  reference slopes).
+- **Resource guards**: `TransientForm` caps mesh resolution at `n ≤ 50` and validates
+  `T/dt ≤ MAX_TIME_STEPS = 200` in `clean()`.
+- **UI integration**: navbar links ("Transient", "Scheme Comparison") added across all
+  six existing pages; new `/TransientThermal/` solve page and
+  `/TransientThermal/comparison/` benchmark page.
+- **Documentation**: `docs/science/governing_equations.md` §3 gained an "Implementation
+  Notes" subsection covering the time-stepping fix, weak forms, IC safety, and the
+  convergence-study mesh-resolution requirement.
+
+### Test coverage
+
+`tests/test_transient.py` — 31 new tests (solver structure, no-overshoot time-stepping,
+steady-state preservation for both schemes in 1D/2D, initial conditions, BE/CN accuracy
+vs. the exact decay solution, temporal convergence rates, plotting/export helpers, form
+validation, Django views). Full suite: **79/79 passing**.
+
+```text
+79 passed in 4.09s
+```
+
+### Design decision — DB-free snapshots and 2D visualization
+
+Per CLAUDE.md, the project must remain a compact research platform rather than acquire
+unnecessary backend/database complexity. Tasks 3.3/3.4 (`TransientJob`/`TransientSnapshot`
+models + AJAX `SnapshotAPIView`) were replaced with embedding all time-step data directly
+in the page response: 1D snapshots become Plotly `frames`/`sliders` (client-side scrubbing,
+no extra requests), and 2D snapshots become a static `tripcolor` panel grid (animated 2D
+payloads were judged too large to embed). This preserves every numerical-method and
+verification requirement of Goal 4 while avoiding new models, migrations, or API
+endpoints.

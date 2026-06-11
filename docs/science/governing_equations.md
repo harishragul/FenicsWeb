@@ -135,6 +135,69 @@ u(x,t) = sin(πx) * exp(-π²·k·t / (ρ·cp))
 ```
 (Use initial condition `u₀ = sin(πx)`)
 
+### Implementation Notes (`TransientThermal/solver.py`)
+
+**Time-stepping loop.** `solve_transient(...)` computes the number of steps
+as `nsteps = max(1, round(T/dt))` and iterates `t = step*dt` for
+`step = 1, …, nsteps`. An earlier `while t < T - 1e-10: t += dt` formulation
+overshoots `T` whenever `T/dt` is not an integer (e.g. `dt=0.04, T=0.1` gives
+`T/dt=2.5`, and the `while` loop ran 3 steps to `t=0.12`). The `round()`-based
+step count guarantees `times[-1] == nsteps*dt` is the closest achievable
+multiple of `dt` to `T`, with no overshoot.
+
+**Weak forms.** Both schemes assemble `F` via UFL and split it with FEniCS's
+`lhs`/`rhs` helpers:
+
+```python
+# Backward Euler
+F = rho*cp/dt*(u - u_n)*v*dx + k*dot(grad(u), grad(v))*dx - Constant(f)*v*dx
+
+# Crank-Nicolson
+u_mid = 0.5*(u + u_n)
+F = rho*cp/dt*(u - u_n)*v*dx + k*dot(grad(u_mid), grad(v))*dx - Constant(f)*v*dx
+
+a, L = lhs(F), rhs(F)
+```
+
+**Initial conditions.** A fixed dictionary `INITIAL_CONDITIONS['1D'|'2D']`
+maps the user-selectable keys `'sine'`, `'gaussian'`, `'constant'` to
+hardcoded `Expression` strings. FEniCS `Expression` objects are JIT-compiled
+as C++ at solve time, so the expression string is **never** built from raw
+user input — only one of these three fixed strings is ever passed to
+`Expression(...)`.
+
+**Boundary conditions.** Homogeneous or non-homogeneous Dirichlet values are
+applied on every domain edge (`left`/`right` in 1D; `+ bottom`/`top` in 2D)
+using `near(x[i], bound)` matches against the mesh's own coordinate extents,
+the same pattern used by `ConvectionDiffusion.solve_convection_diffusion`.
+
+**Temporal convergence study.** `scheme_comparison_1d(dt_values, T, n=200)`
+solves the `sin(πx)` benchmark (homogeneous Dirichlet, `f=0`) for each `dt`
+with both schemes on a fixed `n=200` mesh (`h=0.005`) and compares the
+solution at `t=T` against the exact decay solution via `errornorm(..., 'L2')`.
+A mesh fine enough that the `O(h²)` spatial error (~2.5e-5) stays below the
+temporal error is required to observe the theoretical rates; on a coarser
+`n=100` mesh (`h=0.01`, spatial floor ~1e-4) the Crank-Nicolson rate degrades
+from ≈2.0 toward ≈1.4 as `dt → 0`, because the spatial discretization error
+dominates. With `n=200`, measured rates for `dt ∈ {0.02, 0.01, 0.005}` are
+≈0.95/0.97 (Backward Euler, expected `O(dt¹)`) and ≈1.95/1.80
+(Crank-Nicolson, expected `O(dt²)`). This study is reproduced at
+`/TransientThermal/comparison/`.
+
+**Visualization.** For 1D problems, `generate_transient_plotly(times,
+snapshots, coords)` builds a single Plotly figure with one `go.Frame` per
+time step plus a slider and play/pause buttons, so the full time history can
+be scrubbed client-side without additional requests. `generate_transient_animation`
+renders the same data as an animated GIF via `matplotlib.animation` (pillow
+writer). For 2D problems, `generate_transient_snapshot_grid` plots the field
+at evenly-spaced times as a row of `tripcolor` panels sharing one colorbar
+(animation is skipped for 2D to avoid large in-page payloads).
+
+**Resource guards.** `TransientThermal.forms.TransientForm` caps the mesh
+resolution at `n ≤ 50` and validates `T/dt ≤ MAX_TIME_STEPS = 200` in
+`clean()`, bounding solve time and the size of the generated Plotly/GIF
+output for a web-exposed solver.
+
 ---
 
 ## 4. Finite Element Error Estimates
