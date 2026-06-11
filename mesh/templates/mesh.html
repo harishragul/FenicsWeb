@@ -14,7 +14,11 @@
         <div class="container-fluid">
             <img src="{% static 'img/fenics_logo.png' %}" alt="logo" height="50px">
             <a class="navbar-brand" href="#">FenicsWeb</a>
-            <a class="nav-link" aria-current="page" href="{% url 'generate_mesh' %}">Mesh</a>
+            <a class="nav-link active" aria-current="page" href="{% url 'generate_mesh' %}">Mesh</a>
+            <a class="nav-link" href="{% url 'conduction' %}">Conduction</a>
+            <a class="nav-link" href="{% url 'validation' %}">Validation</a>
+            <a class="nav-link" href="{% url 'convection' %}">Convection-Diffusion</a>
+            <a class="nav-link" href="{% url 'peclet_study' %}">Peclet Study</a>
         </div>
     </nav>
 

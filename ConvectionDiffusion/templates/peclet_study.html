@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FenicsWeb — Peclet Number Study</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <img src="{% static 'img/fenics_logo.png' %}" alt="logo" height="50px">
+        <a class="navbar-brand" href="#">FenicsWeb</a>
+        <a class="nav-link" href="{% url 'generate_mesh' %}">Mesh</a>
+        <a class="nav-link" href="{% url 'conduction' %}">Conduction</a>
+        <a class="nav-link" href="{% url 'validation' %}">Validation</a>
+        <a class="nav-link" href="{% url 'convection' %}">Convection-Diffusion</a>
+        <a class="nav-link active" href="{% url 'peclet_study' %}">Peclet Study</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2>1D Peclet Number Study — Galerkin vs. SUPG</h2>
+    <p class="text-muted">
+        Demonstrates why standard Galerkin finite elements produce spurious
+        oscillations for convection-dominated problems (cell Peclet number
+        Pe<sub>h</sub> &gt; 1), and how SUPG (Streamline Upwind Petrov-Galerkin)
+        stabilization removes them while preserving accuracy.
+    </p>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Problem</h6>
+                    <code>{{ problem }}</code>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">Exact Solution</h6>
+                    <code>{{ exact }}</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h5>Solution Profiles</h5>
+    <img src="{% static plot %}" class="img-fluid mb-4" alt="Peclet study plot">
+
+    <h5>L2 Error vs. Exact Solution</h5>
+    <table class="table table-bordered table-hover w-auto">
+        <thead class="table-dark">
+            <tr>
+                <th>Pe (global)</th>
+                <th>Pe<sub>h</sub> (cell)</th>
+                <th>L2 error — Galerkin</th>
+                <th>L2 error — SUPG</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in results %}
+            <tr>
+                <td>{{ r.pe }}</td>
+                <td>{{ r.cell_pe|floatformat:3 }}</td>
+                <td>{{ r.l2_galerkin|floatformat:5 }}</td>
+                <td>{{ r.l2_supg|floatformat:5 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <p class="text-muted">
+        At low Pe<sub>h</sub> (diffusion-dominated) both methods agree closely
+        with the exact solution. As Pe<sub>h</sub> grows beyond 1, the standard
+        Galerkin solution develops non-physical oscillations (visible as
+        over-/under-shoots above 1 or below 0 in the plot above), while the
+        SUPG solution remains monotone and bounded between the prescribed
+        boundary values.
+    </p>
+</div>
+</body>
+</html>

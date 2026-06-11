@@ -65,6 +65,44 @@ Replace test function `v` with `v_SUPG = v + τ (b·∇v)`:
 u(x) = (exp(Pe·x) - 1) / (exp(Pe) - 1)
 ```
 
+### Implementation Notes (`ConvectionDiffusion/solver.py`)
+
+**Stabilization parameter.** The full SUPG formula `τ_K = h_K/(2|b|) · (coth(Pe_h) - 1/Pe_h)`
+is singular as `Pe_h → 0` (i.e. `b → 0`, pure diffusion) because
+`coth(Pe_h) - 1/Pe_h → ∞ - ∞`. The implementation uses the analytic small-`Pe_h`
+limit `τ_K → h_K²/(12k)` (the first term of the Taylor expansion of
+`coth(x) - 1/x = x/3 - x³/45 + …`) and switches between the two branches with
+`ufl.conditional`:
+
+```python
+tau = conditional(
+    gt(Pe, 1e-8),
+    h / (2 * b_norm + DOLFIN_EPS) * (1 / tanh(Pe) - 1 / Pe),
+    h * h / (12 * k),
+)
+```
+
+Both terms of the bilinear form (diffusion and convection) are tested against
+`v_SUPG = v + τ(b·∇v)`, matching the formulation in `phases/phase2.md`.
+
+**Peclet number.** `compute_peclet_number(mesh, k, bx, by)` returns
+`Pe_h = |b|·h_max/(2k)` using the largest cell diameter in the mesh, displayed
+to the user on the solver page to indicate whether the problem is
+diffusion-dominated (`Pe_h < 1`) or convection-dominated (`Pe_h > 1`).
+
+**Inflow/outflow detection.** `mark_inflow_outflow(mesh, bx, by)` classifies
+every exterior facet by the sign of `b·n` (velocity dotted with the outward
+normal): `1` = inflow (`b·n < 0`, where a Dirichlet value is prescribed),
+`2` = outflow (`b·n > 0`, natural/zero-flux), `3` = characteristic
+(`b·n ≈ 0`, no-flux wall). This requires `mesh.init(dim-1, dim)` to populate
+facet-normal connectivity before calling `Facet.normal()`.
+
+**Peclet study benchmark.** `peclet_study_1d(pe_values, n)` solves the 1D
+benchmark above for `Pe ∈ {1, 10, 50, 100}` with `k = 1/Pe`, `b = 1` on a
+fixed 20-cell mesh, returning nodal values and L2 errors for both Galerkin
+and SUPG against the exact solution. This is the figure used to verify SUPG
+stabilization (`/ConvectionDiffusion/peclet/`).
+
 ---
 
 ## 3. Transient Heat Equation
