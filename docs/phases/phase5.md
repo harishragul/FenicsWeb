@@ -1,283 +1,144 @@
-# Phase 5 — Platform Maturity + Documentation
+# Phase 5 — Scientific Data Export & Mesh Import
 
-**Duration:** 3 weeks
+**Duration:** 2 weeks
 **Status:** Not Started
-**Depends on:** Phase 1, 2, 3 (all solvers working)
-**Unlocks:** Phase 6 (research features need async infrastructure)
+**Depends on:** Phase 1 (steady solver), Phase 2 (convection-diffusion), Phase 3 (transient) — export must cover every solver's output
+**Unlocks:** Phase 6 (documentation references these export/import workflows), Phase 7 (reproducibility evidence for JOSS)
 
 ---
 
 ## Goal
 
-Transform the project from a demo into a production-quality research platform. These additions make the tool usable by other researchers — and the documentation tasks in 5.7 are non-negotiable requirements for JOSS submission.
+Implement Goals 8 and 9: scientific data export (CSV, VTK, XDMF — all ParaView-compatible) and Gmsh `.msh` mesh import, with reproducible post-processing. These are the two remaining capabilities a researcher needs to use FenicsWeb results outside the browser and to bring real geometries into the solver.
 
 ---
 
 ## Tasks
 
-### 5.1 Async Job Queue (Celery + Redis)
+### 5.1 CSV Export (Goal 8)
 
-**Problem:** A 3D solve or a transient simulation can take minutes. Synchronous Django views will time out (default: 30s). Any serious simulation must be async.
-
-**Stack:** Celery (Python distributed task queue) + Redis (message broker).
-
-**Installation:**
-
-```bash
-conda install -c conda-forge celery redis-py
-```
-
-**Docker addition** — add to `docker-compose.yml`:
-
-```yaml
-services:
-  redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-
-  celery:
-    build: .
-    command: celery -A FenicsWeb worker --loglevel=info
-    depends_on:
-      - redis
-    volumes:
-      - .:/app
-```
-
-**`Jobs/tasks.py` skeleton:**
+**Purpose:** The simplest, most portable export — degree-of-freedom coordinates paired with solution values, usable in any spreadsheet or plotting tool, and trivial to diff for regression testing.
 
 ```python
-from celery import shared_task
-
-@shared_task
-def run_steady_conduction(job_id):
-    job = SolverJob.objects.get(id=job_id)
-    job.status = 'running'
-    job.save()
-    try:
-        # ... run solver ...
-        job.status = 'completed'
-        job.result_json = json.dumps(result)
-    except Exception as e:
-        job.status = 'failed'
-        job.error = str(e)
-    job.save()
+def export_csv(u_sol, V, filename):
+    """Write DOF coordinates and solution values to CSV (x[,y][,z],u)."""
+    coords = V.tabulate_dof_coordinates()
+    values = u_sol.vector().get_local()
+    with open(filename, "w", newline="") as f:
+        writer = csv.writer(f)
+        dim = coords.shape[1]
+        writer.writerow([f"x{i}" for i in range(dim)] + ["u"])
+        for c, v in zip(coords, values):
+            writer.writerow(list(c) + [v])
 ```
 
-**View flow:**
-
-1. User submits form → create `SolverJob` record → enqueue Celery task → return job ID
-2. Redirect to `/jobs/<job_id>/status/`
-3. Status page polls `/jobs/<job_id>/api/` every 2 seconds via JavaScript
-4. When status = completed, redirect to results page
+Add a "Download CSV" link to every results page (1D, 2D, 3D, transient — for transient, one CSV per saved timestep or a single long-format CSV with a `time` column).
 
 ---
 
-### 5.2 Jobs Dashboard
+### 5.2 VTK Export (Goal 8)
 
-**`Jobs/models.py`:**
-
-```python
-class SolverJob(models.Model):
-    STATUS = [
-        ('queued', 'Queued'),
-        ('running', 'Running'),
-        ('completed', 'Completed'),
-        ('failed', 'Failed'),
-    ]
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    solver_type = models.CharField(max_length=50)
-    status = models.CharField(max_length=20, choices=STATUS, default='queued')
-    created_at = models.DateTimeField(auto_now_add=True)
-    completed_at = models.DateTimeField(null=True)
-    params_json = models.TextField()
-    result_json = models.TextField(null=True)
-    error = models.TextField(null=True)
-```
-
-Dashboard page: table of all user jobs with status, solver type, elapsed time, and link to results. Allows re-running or deleting old jobs.
-
----
-
-### 5.3 VTK / XDMF Solution Export
-
-VTK (`.vtu`) and XDMF (`.xdmf`) are the standard formats for ParaView — the tool researchers use for publication-quality post-processing.
-
-**Implementation:**
+VTK (`.pvd` + `.vtu`) is the format ParaView reads natively for static fields.
 
 ```python
-from fenics import XDMFFile, File
+from fenics import File
 
 def export_vtk(u_sol, filename):
-    vtkfile = File(f'static/exports/{filename}.pvd')
+    """Write solution field to legacy VTK (.pvd/.vtu) for ParaView."""
+    vtkfile = File(f"{filename}.pvd")
     vtkfile << u_sol
-
-def export_xdmf(u_sol, mesh, filename):
-    with XDMFFile(f'static/exports/{filename}.xdmf') as f:
-        f.write(mesh)
-        f.write(u_sol)
 ```
 
-Add "Download as VTK" and "Download as XDMF" buttons to every results page.
+Add a "Download VTK" button to every results page.
 
 ---
 
-### 5.4 Custom Mesh Upload (Gmsh)
+### 5.3 XDMF Export (Goal 8)
+
+XDMF (`.xdmf` + `.h5`) is the preferred modern format — compact, supports time series, and is the recommended FEniCS output for ParaView.
+
+```python
+from fenics import XDMFFile
+
+def export_xdmf(u_sol, mesh, filename):
+    """Write mesh and solution field to XDMF/HDF5 for ParaView."""
+    with XDMFFile(f"{filename}.xdmf") as f:
+        f.write(mesh)
+        f.write(u_sol)
+
+def export_xdmf_timeseries(filename):
+    """Return an open XDMFFile for appending timestepped solutions
+    via xdmf.write_checkpoint(u, "u", t, append=True)."""
+    return XDMFFile(f"{filename}.xdmf")
+```
+
+For the transient solver (Phase 3), write one frame per saved timestep using `write_checkpoint(u, "u", t, append=True)` so ParaView can animate the time series directly.
+
+Add a "Download XDMF" button to every results page.
+
+---
+
+### 5.4 Gmsh Mesh Import (Goal 9)
+
+**Purpose:** Allow solving on real geometries (not just built-in interval/rectangle/box meshes), and demonstrate that the platform can consume standard preprocessing tool output.
 
 The `CustomMesh` form class is already stubbed out (commented) in `mesh/forms.py:62`.
 
 **Implementation steps:**
 
-- Accept `.msh` (Gmsh format 2 or 4) uploads via `forms.FileField`
-- Convert with `dolfin-convert` or `meshio`:
+1. Accept `.msh` (Gmsh format 2 or 4) uploads via `forms.FileField`.
+2. Convert with [`meshio`](https://github.com/nschloe/meshio) (pure Python, no external binary required):
 
-```bash
-dolfin-convert mesh.msh mesh.xml
-```
+   ```python
+   import meshio
 
-- Store the converted `.xml` in `media/meshes/` and reference it in the `Mesh` model
+   def gmsh_to_xdmf(msh_path, xdmf_path):
+       """Convert a Gmsh .msh file to XDMF mesh format for FEniCS."""
+       mesh = meshio.read(msh_path)
+       cell_type = "tetra" if "tetra" in mesh.cells_dict else (
+           "triangle" if "triangle" in mesh.cells_dict else "line")
+       cells = mesh.cells_dict[cell_type]
+       points = mesh.points[:, :2] if cell_type == "triangle" else mesh.points
+       out_mesh = meshio.Mesh(points=points, cells={cell_type: cells})
+       meshio.write(xdmf_path, out_mesh)
+   ```
 
-Custom meshes allow solving on real engineering geometries (heat sinks, PCB boards, building sections), which makes the tool genuinely useful beyond textbook problems.
+3. Store the converted `.xdmf`/`.h5` pair in `media/meshes/` and reference it from the `Mesh` model.
+4. Load with `XDMFFile(path).read(mesh)` in the solver setup.
 
----
-
-### 5.5 Parameter Sweep / Sensitivity Study
-
-Allow users to sweep any scalar parameter over a range and run all cases automatically.
-
-**`ParameterSweepForm` fields:**
-
-- `sweep_param` — which parameter to sweep (k, f, bx, by, dt)
-- `sweep_min`, `sweep_max`, `sweep_steps` — range definition
-- All other parameters: fixed values
-
-**View flow:**
-
-1. Generate N values via `numpy.linspace`
-2. Enqueue N Celery tasks
-3. Wait page; when all complete, render a results grid
-4. Plot quantity of interest (e.g., max temperature) vs swept parameter
+**Validation example (required):** Generate a simple Gmsh mesh of the unit square (e.g., via `gmsh` Python API or a checked-in `.msh` file in `examples/meshes/`), import it, and re-run the Phase 4 2D conduction benchmark on the imported mesh. The result must agree with the built-in `UnitSquareMesh` result to within mesh-dependent tolerance — this both validates the import pipeline and demonstrates the workflow end-to-end.
 
 ---
 
-### 5.6 User Accounts and Job History
-
-Use Django's built-in auth system:
-
-```python
-from django.contrib.auth.decorators import login_required
-
-@login_required
-def conduction(request):
-    ...
-```
-
-- Add registration / login / logout pages
-- Associate every `Mesh`, `SolverJob`, and result with `request.user`
-- Users only see their own data
-- Django Admin view lets the thesis supervisor review student runs
-
----
-
-### 5.7 Comprehensive Documentation (JOSS Requirement)
-
-JOSS reviewers check documentation quality explicitly. All items below must exist before Phase 7.
-
-#### README overhaul
-
-Replace the current 4-line README with sections covering:
-
-- **Badges row** — CI status, license, JOSS (added in Phase 7), Python version
-- **Screenshot** — actual browser screenshot of the solver in action
-- **What it does** — 1–2 sentences on the tool and its physics scope
-- **Installation** — conda and Docker paths with copy-pasteable commands
-- **Quickstart** — how to run and open the first solver in 5 steps
-- **Features table** — solvers, BC types, export formats, visualization options
-- **Scientific background** — 1 paragraph on FEM and equations solved; link to `docs/science/governing_equations.md`
-- **Validation** — 1 sentence + link to the convergence study page
-- **Citation** — BibTeX block pointing to Zenodo DOI (added in Phase 7)
-- **License** — MIT
-
-#### API docstrings
-
-Add one-line docstrings to all public functions. Standard format:
-
-```python
-def solve_conduction(dimension, mesh, left_bc, right_bc, ...):
-    """Solve steady-state heat conduction via FEniCS FEM; return (u_sol, solution_list)."""
-```
-
-Functions to cover:
-
-- `SteadyStateThermal/conduction.py` — `solve_conduction`, `generate_solution_plot`
-- `ConvectionDiffusion/solver.py` — `solve_convection_diffusion_galerkin`, `solve_convection_diffusion_supg`
-- `TransientThermal/solver.py` — `solve_transient`
-- `mesh/mesh.py` — `generate_mesh`, `show_mesh`, `generate_interactive_mesh_plot`
-- `Validation/convergence.py` — `run_h_refinement_study`, `run_p_refinement_study`
-
-#### `CONTRIBUTING.md` (full upgrade from Phase 0 skeleton)
-
-Expand to include:
-
-- Development environment setup
-- How to run tests (`pytest tests/ -v`)
-- How to add a new solver (step-by-step, pointing to existing solvers as templates)
-- Code style guide (PEP 8, max line length 100)
-- How to submit a pull request
-
-#### User guide pages
-
-Add two short pages under `docs/usage/`:
-
-- `getting_started.md` — first solve walkthrough with screenshots
-- `solvers.md` — what each solver does, what inputs it expects, what the results mean
-
----
-
-## Phase 5 Files to Create
+## Files to Create
 
 | File | Purpose |
 | ---- | ------- |
-| `Jobs/__init__.py` | App init |
-| `Jobs/apps.py` | App config |
-| `Jobs/models.py` | SolverJob model |
-| `Jobs/tasks.py` | Celery tasks for each solver type |
-| `Jobs/views.py` | JobStatusView, JobDashboardView, JobAPIView |
-| `Jobs/urls.py` | URL routes |
-| `Jobs/templates/jobs/dashboard.html` | Job history table |
-| `Jobs/templates/jobs/status.html` | Job polling / waiting page |
-| `CONTRIBUTING.md` | Full contributor guide |
-| `docs/usage/getting_started.md` | User walkthrough |
-| `docs/usage/solvers.md` | Solver reference |
+| `mesh/export.py` | `export_csv`, `export_vtk`, `export_xdmf`, `export_xdmf_timeseries` |
+| `mesh/gmsh_import.py` | `gmsh_to_xdmf` conversion via `meshio` |
+| `tests/test_export.py` | CSV/VTK/XDMF export correctness tests |
+| `tests/test_mesh_import.py` | Gmsh import + re-solve validation test |
+| `examples/meshes/unit_square.msh` | Example Gmsh mesh for import validation |
+| `docs/usage/export_and_paraview.md` | Export formats + opening results in ParaView |
+| `docs/usage/mesh_import.md` | Gmsh import workflow walkthrough |
 
 **Files to modify:**
 
 | File | Change |
 | ---- | ------ |
-| `README.md` | Full overhaul per 5.7 spec |
-| `docker-compose.yml` | Add Redis + Celery worker services |
-| `Dockerfile` | Ensure Celery is installed |
-| `FenicsWeb/settings.py` | Celery config, AUTH, MEDIA_ROOT |
-| `FenicsWeb/urls.py` | Jobs URLs, auth URLs |
-| `mesh/forms.py` | Uncomment CustomMesh, add FileField |
-| All solver `views.py` | Wrap in `@login_required`, enqueue to Celery |
-| All solver Python files | Add one-line docstrings to public functions |
+| `mesh/forms.py` | Implement the commented-out `CustomMesh` upload form |
+| `mesh/views.py` | Handle `.msh` upload, call `gmsh_to_xdmf`, store result |
+| `SteadyStateThermal/views.py`, `ConvectionDiffusion/views.py`, `TransientThermal/views.py` | Wire up export buttons to `mesh/export.py` |
+| Solver result templates | Add "Download CSV / VTK / XDMF" links |
 
 ---
 
 ## Definition of Done
 
-- [ ] Celery + Redis running in Docker, async jobs work end-to-end
-- [ ] Job status page polls and redirects to results when done
-- [ ] Jobs dashboard shows all user jobs with status
-- [ ] VTK export button works, file opens in ParaView
-- [ ] XDMF export button works
-- [ ] Gmsh `.msh` file upload accepted and converted
-- [ ] Parameter sweep page runs N jobs and plots results vs parameter
-- [ ] User registration / login / logout working
-- [ ] All solver pages require login
-- [ ] README has badges, screenshot, installation, quickstart, citation block
-- [ ] All public solver functions have one-line docstrings
-- [ ] `CONTRIBUTING.md` covers setup, tests, adding a solver, PR process
-- [ ] `docs/usage/` has getting-started and solver-reference pages
+- [ ] CSV export produces `(x[,y][,z],u)` rows for 1D/2D/3D solutions, including transient (long format with `time` column)
+- [ ] VTK export opens correctly in ParaView
+- [ ] XDMF export opens correctly in ParaView, including a transient time series animation
+- [ ] Gmsh `.msh` upload accepted, converted via `meshio`, and solvable
+- [ ] Import validation: re-solving the Phase 4 2D benchmark on the imported mesh agrees with the built-in mesh result
+- [ ] Export and mesh-import workflows documented in `docs/usage/`
+- [ ] `tests/test_export.py` and `tests/test_mesh_import.py` pass in CI

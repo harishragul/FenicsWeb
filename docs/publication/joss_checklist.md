@@ -85,7 +85,7 @@ This checklist must be fully green before submitting to JOSS. Each item maps to 
   - Register free at orcid.org if not already done.
 
 - [ ] **References are complete and correct**
-  - FEniCS, dolfin-adjoint, SUPG (Brooks & Hughes), and any benchmark paper cited must have full bibliographic entries.
+  - FEniCS, SUPG (Brooks & Hughes), De Vahl Davis, and any other benchmark paper cited must have full bibliographic entries.
 
 ---
 
@@ -94,10 +94,10 @@ This checklist must be fully green before submitting to JOSS. Each item maps to 
 JOSS explicitly rejects tools described only in aspirational terms ("could be used for research"). At least one of the following must be true:
 
 - [ ] **The authors have used it in a published paper or thesis** — your master's thesis counts.
-- [ ] **The paper.md describes a concrete research result** — the Phase 6 inverse problem study satisfies this.
+- [ ] **The paper.md describes a concrete research result** — the Phase 4 verification/benchmark suite (h- and p-refinement convergence rates, SUPG vs. Galerkin Peclet study, De Vahl Davis comparison) satisfies this.
 - [ ] **Other researchers have cited or used the tool** — optional at submission time; will grow after publication.
 
-The Phase 6 inverse conductivity study (identifiability vs Peclet number) is the primary evidence of research use. Reference it explicitly in the paper's Statement of Need and in a dedicated section.
+The Phase 4 verification and benchmark results are the primary evidence of research use. Reference them explicitly in the paper's Statement of Need and Verification and Validation section.
 
 ---
 
@@ -115,7 +115,7 @@ Based on published reviews of similar tools (`pulse`, `FEniCS-arclength`, `fenic
 
 1. **Reviewer will try to install and run it.** Make sure Docker and conda paths both work.
 2. **Reviewer will run the tests.** Flaky tests that pass locally but fail in CI will block acceptance.
-3. **Reviewer will check the Statement of Need carefully.** Be specific: what problem does FenicsWeb solve that existing tools do not? Answer: web accessibility, integrated V&V dashboard, and the inverse problem capability in a convection-diffusion setting.
+3. **Reviewer will check the Statement of Need carefully.** Be specific: what problem does FenicsWeb solve that existing tools do not? Answer: web accessibility, an integrated V&V/benchmark suite, and ParaView-compatible export with Gmsh import in a convection-diffusion setting.
 4. **Reviewer may ask for more examples.** Prepare a Jupyter notebook or a worked example script as a supplement.
 
 ---

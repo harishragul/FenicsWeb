@@ -92,22 +92,9 @@ u(x,t) = sin(πx) · exp(-π² · k · t)
 
 ---
 
-## 6. Inverse Problem — Synthetic Benchmark
-
-**Setup:**
-- Domain: `[0,1]`, `k_true(x) = 1 + 0.5 sin(2πx)` (smooth varying conductivity)
-- Source: `f = 1`, Dirichlet `u(0)=0, u(1)=0`
-- Measurements: 10 interior points `xᵢ = i/11`, `i=1,...,10`
-- Noise: `ε ~ N(0, σ²)` for σ = 0, 0.01, 0.05, 0.1
-
-**Expected:** Noiseless recovery should achieve L2 error < 0.01 for good regularization parameter `α`. Recovery degrades gracefully with increasing noise.
-
----
-
 ## Additional References
 
 - **FEniCS documentation:** https://fenicsproject.org/documentation/
 - **FEniCS Tutorial (Langtangen & Logg, 2016):** https://fenicsproject.org/pub/tutorial/html/
 - **SUPG original paper:** Brooks, A.N. & Hughes, T.J.R. (1982). Streamline upwind/Petrov-Galerkin formulations for convection dominated flows with particular emphasis on the incompressible Navier-Stokes equations. *Comput. Methods Appl. Mech. Eng.*, 32, 199–259.
-- **dolfin-adjoint:** Farrell, P.E. et al. (2013). Automated derivation of the adjoint of high-level mathematical programs. *SIAM J. Sci. Comput.*, 35(4), C369–C393.
 - **Ern & Guermond (2004):** Theory and Practice of Finite Elements. Springer Applied Mathematical Sciences, vol. 159.

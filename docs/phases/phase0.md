@@ -285,15 +285,15 @@ The full README overhaul is in Phase 5. Phase 0 just needs enough to not embarra
 
 ## Definition of Done
 
-- [ ] Repository is public on GitHub
+- [x] Repository is public on GitHub
 - [x] `pytest tests/` runs without errors locally — **16/16 passing in 0.33s**
-- [ ] GitHub Actions CI badge shows green on the README — pending repo going public
+- [x] GitHub Actions CI badge shows green on the README
 - [x] `CONTRIBUTING.md` exists
 - [x] `.gitignore` covers all FEniCS/Django/Python artifacts
 - [x] At least 3 passing tests in the suite — **16 tests across 2 modules**
 
-> **One item remaining:** make the GitHub repo public. Everything else is done.
-> That single action starts the 6-month JOSS eligibility clock.
+> Phase 0 complete. The repo is public and CI is green, so the 6-month
+> JOSS eligibility clock is running.
 
 ---
 

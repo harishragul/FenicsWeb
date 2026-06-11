@@ -99,36 +99,7 @@ u(x,t) = sin(πx) * exp(-π²·k·t / (ρ·cp))
 
 ---
 
-## 4. Inverse Heat Conduction
-
-**Forward problem:** Given `k(x)`, find `u`:
-```
--∇·(k∇u) = f    in Ω
-```
-
-**Inverse problem:** Given noisy measurements `{u(xᵢ)}_obs`, find `k(x)` minimizing:
-```
-J(k) = Σᵢ (u(xᵢ) - u_obs_i)²  +  α ∫_Ω |∇k|² dx
-```
-
-The second term is Tikhonov regularization (H¹ semi-norm of k).
-
-**Adjoint equation** (for gradient computation):
-```
--∇·(k∇p) = -2 Σᵢ (u(xᵢ) - u_obs_i) δ(x - xᵢ)
-```
-where `p` is the adjoint variable (Lagrange multiplier).
-
-**Gradient of J with respect to k:**
-```
-dJ/dk = ∇u · ∇p  +  2α (-∇²k)
-```
-
-This is computed automatically by `dolfin-adjoint`.
-
----
-
-## 5. Finite Element Error Estimates
+## 4. Finite Element Error Estimates
 
 For a problem with solution `u ∈ H^{s+1}(Ω)` solved with P_p elements on mesh of size `h`:
 

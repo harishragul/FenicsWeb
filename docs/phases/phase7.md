@@ -29,14 +29,32 @@ Checklist:
   - `tests/test_conduction.py` — steady-state with Dirichlet, Neumann, Robin BCs
   - `tests/test_convection.py` — Galerkin and SUPG solvers, 1D analytical comparison
   - `tests/test_transient.py` — Backward Euler and Crank-Nicolson, temporal convergence
-  - `tests/test_inverse.py` — noiseless recovery error < 0.01
   - `tests/test_mesh.py` — all mesh types create successfully
+  - `tests/test_export.py`, `tests/test_mesh_import.py` — export and Gmsh import (Phase 5)
 
 If any test is missing, write it before proceeding.
 
 ---
 
-### 7.2 Zenodo DOI for the software archive
+### 7.2 CITATION.cff and Zenodo DOI for the software archive
+
+`CITATION.cff` is the GitHub-recognized citation file format (Goal 12) — it
+powers the "Cite this repository" button and is what Zenodo reads to
+populate the archive's metadata.
+
+```yaml
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "FenicsWeb: A Web-Based Finite Element Framework for Convection-Diffusion Heat Transfer"
+authors:
+  - family-names: "Your Last Name"
+    given-names: "Your First Name"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+version: 1.0.0
+date-released: "2026-XX-XX"
+license: MIT
+repository-code: "https://github.com/<user>/FenicsWeb"
+```
 
 Zenodo provides a permanent DOI for a GitHub repository snapshot — required for the JOSS citation block.
 
@@ -44,9 +62,9 @@ Steps:
 
 1. Go to zenodo.org → Log in with GitHub
 2. Enable the FenicsWeb repository in Zenodo's GitHub sync settings
-3. Create a GitHub Release (e.g., tag `v1.0.0`) — Zenodo automatically archives it
+3. Create a GitHub Release (e.g., tag `v1.0.0`) — Zenodo automatically archives it and reads `CITATION.cff` for metadata
 4. Copy the DOI badge and DOI string (format: `10.5281/zenodo.XXXXXXX`)
-5. Add the DOI badge to the README
+5. Add the DOI to `CITATION.cff` and the DOI badge to the README
 6. Add the BibTeX citation block to the README:
 
 ```bibtex
@@ -99,21 +117,20 @@ bibliography: paper.bib
 # Statement of Need
 [Why does this tool need to exist? What gap does it fill?
 Reference AirTrafficSim, OSSCAR as precedents for web-based
-simulation tools. Explain that no web-accessible FEM tool for
-convection-diffusion with SUPG stabilisation and inverse problem
-capability existed before this work.]
+simulation tools. Explain that no web-accessible FEM tool combining
+convection-diffusion with SUPG stabilisation, an integrated
+verification/benchmark suite, and ParaView-compatible export existed
+before this work.]
 
 # Features and Functionality
 [Describe each solver module in 1–2 sentences each.
-Mention BC types, element orders, export formats.]
+Mention BC types, element orders, time integration schemes,
+export formats, and Gmsh mesh import.]
 
 # Verification and Validation
-[1 paragraph: h-convergence study result, De Vahl Davis benchmark.
-This is the "research use" evidence JOSS requires.]
-
-# Research Application: Inverse Conductivity Recovery
-[1 paragraph on Phase 6 result — the identifiability-vs-Peclet study.
-This is the novel result that elevates the paper above a pure software note.]
+[1–2 paragraphs: h- and p-refinement convergence study results
+(L2/H1 rates), SUPG vs. Galerkin Peclet study, and the De Vahl Davis
+benchmark comparison. This is the "research use" evidence JOSS requires.]
 
 # Acknowledgements
 [Funding, supervisor, institution]
@@ -192,7 +209,7 @@ Post before JOSS submission. arXiv gives immediate visibility and does not block
 
 **Title:** same as `paper.md` title.
 
-**Abstract** (150–200 words): Summarise the software, the physics covered, the validation results, and the inverse conductivity research finding. End with a sentence on availability.
+**Abstract** (150–200 words): Summarise the software, the physics covered, and the verification/benchmark results. End with a sentence on availability.
 
 **Submission steps:**
 
@@ -238,6 +255,7 @@ Post before JOSS submission. arXiv gives immediate visibility and does not block
 
 | File | Purpose |
 | ---- | ------- |
+| `CITATION.cff` | GitHub/Zenodo citation metadata (Goal 12) |
 | `paper.md` | JOSS submission paper (750–1750 words) |
 | `paper.bib` | BibTeX references for paper.md |
 
@@ -253,6 +271,7 @@ Post before JOSS submission. arXiv gives immediate visibility and does not block
 ## Definition of Done
 
 - [ ] `pytest tests/ -v` passes with zero failures
+- [ ] `CITATION.cff` committed at repository root
 - [ ] GitHub Release `v1.0.0` tagged and Zenodo DOI obtained
 - [ ] `paper.md` committed, 750–1750 words, all sections present
 - [ ] `paper.bib` committed with all cited references

@@ -3,13 +3,13 @@
 **Duration:** 3 weeks  
 **Status:** Not Started  
 **Depends on:** Phase 1 (correct solver), Phase 2 (convection-diffusion)  
-**Unlocks:** Phase 6 (research contribution needs validated solver)
+**Unlocks:** Phase 6 (documentation cites these results), Phase 7 (publication evidence)
 
 ---
 
 ## Goal
 
-Add the Verification and Validation (V&V) infrastructure that separates a research tool from a student project. Every figure produced here can go directly into a thesis chapter.
+Add the Verification and Validation (V&V) infrastructure that separates a research tool from a student project. The plots and tables produced here form the verification and validation evidence for the project (Goals 5–7).
 
 ---
 
@@ -76,7 +76,7 @@ for n in mesh_sizes:
 - L2 error: `O(h²)` → slope ≈ 2.0 on log-log plot
 - H1 error (energy norm): `O(h¹)` → slope ≈ 1.0 on log-log plot
 
-**Output:** Table + log-log convergence plot (this plot belongs in every FEM thesis).
+**Output:** Table + log-log convergence plot (a standard verification figure in finite element analysis).
 
 ---
 
@@ -142,7 +142,7 @@ Nu = -∫_{left wall} ∂u/∂x dy   (dimensionless heat transfer rate)
 | 10⁵ | 4.519 |
 | 10⁶ | 8.800 |
 
-Compute the Nusselt number from your solver and compare in a table. Note that without the flow solver, we can only compare the thermal field at Ra=0 (pure conduction), but the infrastructure and comparison methodology is what matters for the thesis.
+Compute the Nusselt number from your solver and compare in a table. Note that without the flow solver, we can only compare the thermal field at Ra=0 (pure conduction), but the infrastructure and comparison methodology is what matters for validation.
 
 ---
 

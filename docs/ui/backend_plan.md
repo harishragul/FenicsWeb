@@ -58,7 +58,6 @@ class Project(models.Model):
         ('steady_conduction',    'Steady Conduction'),
         ('convection_diffusion', 'Convection-Diffusion'),  # Phase 2
         ('transient',            'Transient Heat'),         # Phase 3
-        ('inverse',              'Inverse Problem'),        # Phase 6
     ]
     STATUS = [
         ('new',        'New'),

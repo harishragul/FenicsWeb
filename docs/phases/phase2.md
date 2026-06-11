@@ -141,7 +141,7 @@ def solve_convection_diffusion_supg(mesh, k, bx, by, f, bcs):
 - Error table: L2 error for both methods at each Pe value
 - A short explanation of what Peclet number means physically
 
-**This is the key figure** for your thesis chapter on stabilization.
+**This is the key validation figure** demonstrating SUPG stabilization (Goal 3).
 
 ---
 

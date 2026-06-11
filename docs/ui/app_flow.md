@@ -28,8 +28,6 @@ This document defines the new project-based architecture that all future phases 
 │                 │                                                    │
 │  ── Tools ──    │                                                    │
 │  ○ Validation   │                                                    │
-│  ○ Inverse      │                                                    │
-│    (Phase 6)    │                                                    │
 └─────────────────┴──────────────────────────────────────────────────┘
 ```
 
@@ -84,9 +82,9 @@ This document defines the new project-based architecture that all future phases 
 │  TOOLS          │  ║  Solver: Steady Conduction                  ║ │
 │                 │  ║                                             ║ │
 │  ○ Validation   │  ║  [Mesh ✓]──[Setup ○]──[Solve ○]            ║ │
-│  ○ Inverse      │  ║  Setup not complete                         ║ │
-│    Problem      │  ║                                    [Open ▶] ║ │
-│    (Phase 6)    │  ╚══════════════════════════════════════════════╝ │
+│                 │  ║  Setup not complete                         ║ │
+│                 │  ║                                    [Open ▶] ║ │
+│                 │  ╚══════════════════════════════════════════════╝ │
 │                 │                                                   │
 └─────────────────┴───────────────────────────────────────────────────┘
 ```
@@ -211,7 +209,6 @@ class Project(models.Model):
         ('steady_conduction',     'Steady Conduction'),
         ('convection_diffusion',  'Convection-Diffusion'),   # Phase 2
         ('transient',             'Transient Heat'),          # Phase 3
-        ('inverse',               'Inverse Problem'),         # Phase 6
     ]
     STATUS = [
         ('new',        'New'),

@@ -1,6 +1,6 @@
 # FenicsWeb
 
-![CI](https://github.com/harishragulkarthik/FenicsWeb/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/harishragul/FenicsWeb/actions/workflows/ci.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)
 ![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)
 
@@ -13,13 +13,13 @@ A web-based finite element solver for heat conduction and convection-diffusion p
 | Capability | Status |
 | ---------- | ------ |
 | Steady-state heat conduction (1D / 2D / 3D) | Available |
-| Dirichlet, Neumann, Robin boundary conditions | In progress (Phase 1) |
+| Dirichlet, Neumann, Robin boundary conditions | Available |
 | Convection-diffusion with SUPG stabilization | Planned (Phase 2) |
 | Transient heat equation (Crank-Nicolson) | Planned (Phase 3) |
-| h/p-refinement convergence study dashboard | Planned (Phase 4) |
-| Async job queue (Celery + Redis) | Planned (Phase 5) |
-| VTK / XDMF export for ParaView | Planned (Phase 5) |
-| Inverse conductivity recovery (dolfin-adjoint) | Planned (Phase 6) |
+| Higher-order elements (P2/P3) & h/p-refinement convergence | Planned (Phase 4) |
+| Benchmark library (1D/2D exact solutions, De Vahl Davis) | Planned (Phase 4) |
+| CSV / VTK / XDMF export for ParaView | Planned (Phase 5) |
+| Gmsh mesh import | Planned (Phase 5) |
 
 ---
 
@@ -28,7 +28,7 @@ A web-based finite element solver for heat conduction and convection-diffusion p
 ### Option 1 — Conda (recommended)
 
 ```bash
-git clone https://github.com/harishragulkarthik/FenicsWeb.git
+git clone https://github.com/harishragul/FenicsWeb.git
 cd FenicsWeb
 conda env create -f environment.yml
 conda activate fenicsproject
@@ -41,7 +41,7 @@ Open <http://127.0.0.1:8000>
 ### Option 2 — Docker
 
 ```bash
-git clone https://github.com/harishragulkarthik/FenicsWeb.git
+git clone https://github.com/harishragul/FenicsWeb.git
 cd FenicsWeb
 docker-compose up --build
 ```
@@ -100,7 +100,7 @@ If you use FenicsWeb in your research, please cite it as:
   title   = {FenicsWeb: A Web-Based Finite Element Framework for
              Convection-Diffusion Heat Transfer},
   year    = {2026},
-  url     = {https://github.com/harishragulkarthik/FenicsWeb}
+  url     = {https://github.com/harishragul/FenicsWeb}
 }
 ```
 

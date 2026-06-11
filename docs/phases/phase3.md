@@ -196,7 +196,7 @@ Add a download link on the results page.
 - L2 error at final time `T` for both schemes
 - Convergence in `dt`: halve the time step, error should halve (BE) or quarter (CN)
 
-This is a clean temporal convergence result for the thesis.
+This is a clean temporal convergence result demonstrating the expected first- and second-order accuracy of Backward Euler and Crank-Nicolson (Goal 4).
 
 ---
 
