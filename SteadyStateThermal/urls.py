@@ -1,7 +1,6 @@
 from django.urls import path
-from .views import conduction, validation
+from .views import conduction
 
 urlpatterns = [
     path('', conduction, name='conduction'),
-    path('validation/', validation, name='validation'),
 ]

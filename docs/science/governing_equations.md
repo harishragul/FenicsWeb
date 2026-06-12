@@ -218,3 +218,63 @@ For a problem with solution `u ∈ H^{s+1}(Ω)` solved with P_p elements on mesh
 ```
 rate = log(e_coarse / e_fine) / log(h_coarse / h_fine)
 ```
+
+### Implementation Notes (`Validation/`)
+
+The `Validation` Django app is the verification framework required by Goal 6.
+It is deliberately stateless (no models): every page recomputes its results
+from scratch on each request, so every number on the site is reproducible by
+re-running the corresponding function.
+
+**`Validation/analytical.py`** provides the manufactured/exact solutions used
+throughout: `exact_1d_poisson` (`u=x(1-x)`, Section 2 above),
+`exact_2d_poisson` (`u=sin(πx)sin(πy)`, Section 3), and `source_2d_poisson`
+(the matching right-hand side `f=2π²k·sin(πx)sin(πy)`).
+
+**`Validation/convergence.py`** implements `_rate(prev_err, err, prev_h, h)`
+exactly as the formula above, and three studies:
+
+- `poisson_1d_convergence(mesh_sizes, k)` — h-refinement of `-k u''=2k` on
+  `[0,1]` with P1 elements. Measured rates on `n ∈ {8,16,32,64}`: L2 → 2.00,
+  H1 → 1.00 (matches theory to 4 decimal places).
+- `poisson_2d_convergence(mesh_sizes, k, element_order)` — h-refinement of
+  the 2D manufactured solution; `element_order` selects P1/P2/P3.
+- `p_refinement_study(mesh_sizes, orders)` — calls `poisson_2d_convergence`
+  for `orders=(1,2,3)`. Measured L2 rates on `n ∈ {4,8,16,32}`: P1 → 1.99,
+  P2 → 3.00, P3 → 4.02.
+- `convection_diffusion_convergence(pe_values, mesh_sizes)` — solves the 1D
+  convection-diffusion benchmark (Section 4, ConvectionDiffusion solver)
+  with both `'galerkin'` and `'supg'` and reports L2 error **and** the
+  min/max nodal value. The min/max pair is the more informative diagnostic
+  at high Pe: at `Pe=100`, `Pe_h=6.25` (`n=8`), standard Galerkin undershoots
+  to `u_min ≈ -0.87` (a 87% spurious oscillation below the physical lower
+  bound `u=0`), while SUPG remains within `[0,1]` at every mesh size tested.
+  Raw L2 error is *not* a reliable indicator of SUPG's benefit here — SUPG's
+  added numerical diffusion can give it a marginally larger L2 error than an
+  oscillatory Galerkin solution on the same mesh, even though the Galerkin
+  solution is qualitatively wrong (violates the discrete maximum principle).
+
+All three studies feed `generate_h_refinement_plot`,
+`generate_p_refinement_plot`, and `generate_convection_diffusion_plot`,
+which render log-log error-vs-`h` plots with a dashed `O(h^p)` reference
+line and the *observed* rate (computed via `_rate` between the coarsest and
+finest mesh) annotated directly in the legend.
+
+**`Validation/benchmarks.py`** implements the De Vahl Davis cavity
+(Section 1) in its Ra=0 (pure-conduction) limit:
+`de_vahl_davis_conduction(n)` solves `-∇²u=0` on `[0,1]²` with `u=1` on the
+left wall, `u=0` on the right wall, and natural (zero-flux) conditions on
+top/bottom — i.e. those boundaries are simply omitted from the weak form.
+The average Nusselt number is computed as
+`Nu = -∫_{x=0} ∂u/∂x dy = -assemble(grad(u_sol)[0]*ds(left))`, using a
+`MeshFunction` to mark the left-wall facets. The measured value is
+`Nu = 1.0000000000000080` for `n=32` — i.e. exact to 14 significant digits,
+since the discrete solution of `-∇²u=0` with these boundary conditions is
+the linear function `u=1-x`, which P1 elements represent exactly.
+
+**`Validation/views.py`** provides three pages: `/Validation/convergence/`
+(all four studies above, full mesh-size ranges), `/Validation/benchmark/`
+(De Vahl Davis), and `/Validation/` — the validation dashboard, which
+re-runs each study at reduced resolution (for response time) and renders a
+table of pass/fail checks against the expected rates/values documented here
+and in `docs/science/benchmark_references.md`.

@@ -22,6 +22,8 @@
 
 **Note for this project:** FenicsWeb solves only the thermal diffusion problem (Ra=0 limit — no buoyancy-driven flow). The thermal field comparison at Ra=0 (pure conduction) gives `Nu = 1.0`. The full Boussinesq flow would require coupling the Navier-Stokes equations — a future extension.
 
+**Verified:** `Validation.benchmarks.de_vahl_davis_conduction(n)` (`/Validation/benchmark/`) solves this Ra=0 limit on a 32×32 mesh and computes `Nu = -∫_{x=0} ∂u/∂x dy` via `assemble(grad(u_sol)[0]*ds(left))`. Measured `Nu = 1.0000000000000080`, exact to 14 significant digits.
+
 ---
 
 ## 2. 1D Steady Conduction — Analytical Benchmark
@@ -38,6 +40,8 @@ u(x) = u_L + (u_R - u_L) * x/L  +  f / (2k) * x * (L - x)
 - Exact: `u(x) = x(1 - x)`
 - Expected L2 convergence rate (P1): ≈ 2.0
 
+**Verified:** `Validation.convergence.poisson_1d_convergence` (`/Validation/convergence/`) solves this exact problem with P1 elements on `n ∈ {4,8,16,32,64}`. Measured rates between the two finest meshes: L2 ≈ 2.00, H1 ≈ 1.00.
+
 ---
 
 ## 3. 2D Steady Conduction — Manufactured Solution
@@ -52,6 +56,8 @@ u(x) = u_L + (u_R - u_L) * x/L  +  f / (2k) * x * (L - x)
 - P1: ≈ 2.0
 - P2: ≈ 3.0
 - P3: ≈ 4.0
+
+**Verified:** `Validation.convergence.poisson_2d_convergence` (h-refinement, P1) and `Validation.convergence.p_refinement_study` (P1/P2/P3 on `n ∈ {4,8,16,32}`) at `/Validation/convergence/`. Measured L2 rates between the two finest meshes: P1 ≈ 1.99, P2 ≈ 3.00, P3 ≈ 4.02.
 
 ---
 
@@ -73,6 +79,8 @@ u(x) = (exp(Pe·x) - 1) / (exp(Pe) - 1)
 | 10 | Thin boundary layer, Galerkin starts oscillating on coarse mesh |
 | 100 | Very thin boundary layer, Galerkin completely wrong without SUPG |
 
+**Verified:** `Validation.convergence.convection_diffusion_convergence` (`/Validation/convergence/`) solves this benchmark with both `'galerkin'` and `'supg'` for `Pe ∈ {0.1, 100}` on `n ∈ {8,16,32,64}`, reporting L2 error and the min/max nodal value. At `Pe=100`, `n=8` (`Pe_h=6.25 > 1`): standard Galerkin undershoots to `u_min ≈ -0.87` (violating the exact solution's `[0,1]` bound), while SUPG stays within `[0,1]` at every mesh size — the discrete-maximum-principle property that motivates SUPG, independent of raw L2 error.
+
 ---
 
 ## 5. Transient Heat Equation — Analytical Benchmark
@@ -89,6 +97,8 @@ u(x,t) = sin(πx) · exp(-π² · k · t)
 **Temporal convergence rates:**
 - Backward Euler: ≈ 1.0
 - Crank-Nicolson: ≈ 2.0
+
+**Verified:** `TransientThermal.solver.scheme_comparison_1d` (`/TransientThermal/comparison/`) solves this benchmark on a `n=200` mesh for `dt ∈ {0.02, 0.01, 0.005}`. Measured rates: Backward Euler ≈ 0.95–0.97, Crank-Nicolson ≈ 1.80–1.95 (see `docs/science/governing_equations.md` §3 for the mesh-resolution caveat).
 
 ---
 

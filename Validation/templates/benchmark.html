@@ -1,0 +1,77 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FenicsWeb — De Vahl Davis Benchmark</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <img src="{% static 'img/fenics_logo.png' %}" alt="logo" height="50px">
+        <a class="navbar-brand" href="#">FenicsWeb</a>
+        <a class="nav-link" href="{% url 'generate_mesh' %}">Mesh</a>
+        <a class="nav-link" href="{% url 'conduction' %}">Conduction</a>
+        <a class="nav-link active" href="{% url 'validation' %}">Validation</a>
+        <a class="nav-link" href="{% url 'convection' %}">Convection-Diffusion</a>
+        <a class="nav-link" href="{% url 'peclet_study' %}">Peclet Study</a>
+        <a class="nav-link" href="{% url 'transient' %}">Transient</a>
+        <a class="nav-link" href="{% url 'scheme_comparison' %}">Scheme Comparison</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2>De Vahl Davis Cavity Benchmark</h2>
+    <p><a href="{% url 'validation' %}">&larr; Back to Validation Dashboard</a></p>
+
+    <p class="text-muted">
+        The De Vahl Davis (1983) differentially-heated square cavity is a
+        classic natural-convection benchmark: a hot left wall
+        (<code>u=1</code>), a cold right wall (<code>u=0</code>), and
+        insulated (zero-flux) top and bottom walls. FenicsWeb solves the
+        steady thermal diffusion equation only, i.e. the
+        <strong>Ra → 0 (pure conduction)</strong> limit of the full
+        natural-convection problem. In this limit the exact solution is
+        <code>u(x,y) = 1 − x</code> (independent of <code>y</code>), giving
+        an exact average Nusselt number of <code>Nu = 1.0</code> along the
+        hot wall — a useful target for verifying the Nusselt-number
+        post-processing itself.
+    </p>
+
+    <img src="{% static plot %}" class="img-fluid mb-4" alt="De Vahl Davis temperature field">
+
+    <h5>Average Nusselt Number</h5>
+    <p>
+        <code>Nu = −∫<sub>x=0</sub> ∂u/∂x dy</code>, computed on a
+        32&times;32 mesh:
+        <strong>{{ nu_avg|floatformat:4 }}</strong>
+        (exact, Ra=0: 1.0000)
+    </p>
+
+    <table class="table table-bordered w-auto">
+        <thead class="table-dark">
+            <tr><th>Ra</th><th>Nu</th><th>Source</th></tr>
+        </thead>
+        <tbody>
+            {% for r in reference %}
+            <tr>
+                <td>{{ r.ra|floatformat:0 }}</td>
+                <td>{{ r.nu|floatformat:3 }}</td>
+                <td>{{ r.note }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p class="text-muted">
+        The Ra=10³–10⁶ rows are the published De Vahl Davis (1983) reference
+        values for the full natural-convection problem and are <em>not</em>
+        reproduced by this solver (no momentum equation is solved); they are
+        included for context on how strongly convection enhances heat
+        transfer (<code>Nu &gt; 1</code>) relative to the pure-conduction
+        baseline verified above.
+    </p>
+</div>
+</body>
+</html>
